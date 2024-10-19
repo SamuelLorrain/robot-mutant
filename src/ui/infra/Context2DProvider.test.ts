@@ -1,10 +1,8 @@
 /**
  * @vitest-environment jsdom
  */
-import { expect, test } from 'vitest'
+import { expect, test, vi } from 'vitest'
 import Context2DProvider from "./Context2DProvider";
-
-import { vi } from 'vitest'
 import { JSDOM } from 'jsdom';
 
 
@@ -19,7 +17,7 @@ const dom = new JSDOM(`
 
 vi.stubGlobal('document', dom.window.document);
 
-test('can instanciate Context2DProvider', () => {
+test('can instantiate Context2DProvider', () => {
   const instance = Context2DProvider.getInstance();
   expect(instance).not.toBeNull();
 });
