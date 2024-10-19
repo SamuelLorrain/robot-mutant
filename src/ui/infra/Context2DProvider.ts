@@ -45,6 +45,13 @@ export default class Context2DProvider {
     return this._canvas;
   }
 
+  public updateCanvasSize(newWidth: number, newHeight: number) {
+    if (newWidth !== this._canvas.width || newHeight !== this._canvas.height) {
+      this._canvas.width = newWidth;
+      this._canvas.height = newHeight;
+    }
+  }
+
   public paintBackground() {
     this.ctx.fillStyle = conf.canvas.background;
     this.ctx.fillRect(0,0, this.canvas.width, this.canvas.height);
