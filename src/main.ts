@@ -1,14 +1,15 @@
 import "./style.css";
 import Context2DProvider from '@/ui/infra/Context2DProvider';
 import CanvasChangeSizeObserver from "@/ui/infra/CanvasChangeSizeObserver";
+import Mouse from "@/ui/infra/Mouse";
 import { StandaloneTile } from "@/ui/infra/StandaloneTile";
+import { Vec2D } from "@/common/Vec2D";
+
 import grass from "@/assets/tiles/kenney/grass.png";
 import sand from "@/assets/tiles/kenney/sand.png";
-import { Vec2D } from "./common/Vec2D";
 
 const TILE_SIZE = new Vec2D(100, 50);
 let origin = new Vec2D();
-let mouse = new Vec2D();
 let pointerTile = new StandaloneTile(sand);
 
 function drawTile(ctx: CanvasRenderingContext2D, tile: StandaloneTile, x: number, y: number) {
@@ -29,13 +30,9 @@ function drawGrid(ctx: CanvasRenderingContext2D, grid: Int32Array, tiles: Standa
     }
 }
 
-window.addEventListener('mousemove', (e) => {
-  mouse.x = e.clientX * window.devicePixelRatio;
-  mouse.y = e.clientY * window.devicePixelRatio;
-});
-
 window.addEventListener('load', () => {
   const context2dProvider = Context2DProvider.getInstance();
+  const mouse = Mouse.getInstance();
   const ctx = context2dProvider.ctx;
   const changeSizeObserver = new CanvasChangeSizeObserver();
   changeSizeObserver.observe(context2dProvider.canvas);
