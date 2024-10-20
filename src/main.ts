@@ -2,7 +2,7 @@ import "./style.css";
 import Context2DProvider from '@/ui/infra/Context2DProvider';
 import CanvasChangeSizeObserver from "@/ui/infra/CanvasChangeSizeObserver";
 import Mouse from "@/ui/infra/Mouse";
-import { StandaloneTile } from "@/ui/infra/StandaloneTile";
+import ImageData from "@/ui/infra/ImageData";
 import { Vec2D } from "@/common/Vec2D";
 
 import grass from "@/assets/tiles/kenney/grass.png";
@@ -10,15 +10,15 @@ import sand from "@/assets/tiles/kenney/sand.png";
 
 const TILE_SIZE = new Vec2D(100, 50);
 let origin = new Vec2D();
-let pointerTile = new StandaloneTile(sand);
+let pointerTile = new ImageData(sand);
 
-function drawTile(ctx: CanvasRenderingContext2D, tile: StandaloneTile, x: number, y: number) {
+function drawTile(ctx: CanvasRenderingContext2D, tile: ImageData, x: number, y: number) {
     const drawX = origin.x + (x-y)*(TILE_SIZE.x/2);
     const drawY = origin.y + (x+y)*(TILE_SIZE.y/2);
     ctx.drawImage(tile.imageData, drawX, drawY);
 }
 
-function drawGrid(ctx: CanvasRenderingContext2D, grid: Int32Array, tiles: StandaloneTile[], mouseCellSelected: Vec2D) {
+function drawGrid(ctx: CanvasRenderingContext2D, grid: Int32Array, tiles: ImageData[], mouseCellSelected: Vec2D) {
     for (let i = 0; i < 9; i++) {
       for (let j = 0; j < 9; j++) {
         if (i == mouseCellSelected.x && j == mouseCellSelected.y) {
@@ -37,8 +37,8 @@ window.addEventListener('load', () => {
   const changeSizeObserver = new CanvasChangeSizeObserver();
   changeSizeObserver.observe(context2dProvider.canvas);
 
-  const tiles: StandaloneTile[] = [];
-  tiles.push(new StandaloneTile(grass));
+  const tiles: ImageData[] = [];
+  tiles.push(new ImageData(grass));
 
   const grid = new Int32Array(9*9); // everything initialised to 0
 

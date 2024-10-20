@@ -1,4 +1,4 @@
-export class StandaloneTile {
+export default class ImageData {
   private readonly _uri: string;
   private readonly _imageData: HTMLImageElement;
 
