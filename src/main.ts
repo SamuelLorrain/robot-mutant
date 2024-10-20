@@ -5,42 +5,57 @@ import Mouse from "@/ui/infra/Mouse";
 import ImageData from "@/ui/infra/ImageData";
 import { Vec2D } from "@/common/Vec2D";
 
-import grass from "@/assets/tiles/kenney/grass.png";
-import sand from "@/assets/tiles/kenney/sand.png";
+import green from "@/assets/tiles/green.png";
+import blue from "@/assets/tiles/blue.png";
+import white from "@/assets/tiles/white.png";
+import whiteSelection from "@/assets/tiles/white-selection.png";
+import selection from "@/assets/tiles/selection.png";
 
-const TILE_SIZE = new Vec2D(100, 50);
+const TILE_SIZE = new Vec2D(32, 16);
 let origin = new Vec2D();
-let pointerTile = new ImageData(sand);
+let player = new Vec2D(0, 5);
 
-function drawTile(ctx: CanvasRenderingContext2D, tile: ImageData, x: number, y: number) {
-    const drawX = origin.x + (x-y)*(TILE_SIZE.x/2);
-    const drawY = origin.y + (x+y)*(TILE_SIZE.y/2);
-    ctx.drawImage(tile.imageData, drawX, drawY);
+const pointerTile = new ImageData(selection);
+const playerPositionTile = new ImageData(blue);
+const whiteTile = new ImageData(white);
+const whiteSelectionTile = new ImageData(whiteSelection);
+
+function drawTile(ctx: CanvasRenderingContext2D, tile: ImageData, x: number, y: number, alpha: number = 1) {
+  const drawX = origin.x + (x-y)*(TILE_SIZE.x/2);
+  const drawY = origin.y + (x+y)*(TILE_SIZE.y/2);
+  const previousAlpha = ctx.globalAlpha;
+  ctx.globalAlpha = alpha;
+  ctx.drawImage(tile.imageData, drawX, drawY);
+  ctx.globalAlpha = previousAlpha;
 }
 
 function drawGrid(ctx: CanvasRenderingContext2D, grid: Int32Array, tiles: ImageData[], mouseCellSelected: Vec2D) {
-    for (let i = 0; i < 9; i++) {
-      for (let j = 0; j < 9; j++) {
-        if (i == mouseCellSelected.x && j == mouseCellSelected.y) {
-          drawTile(ctx, pointerTile, i, j);
-        } else {
-          drawTile(ctx, tiles[grid[9*j + i]], i, j);
-        }
+  for (let i = 0; i < 10; i++) {
+    for (let j = 0; j < 10; j++) {
+      drawTile(ctx, tiles[grid[10*j + i]], i, j);
+
+      if (i == player.x && j == player.y) {
+        drawTile(ctx, playerPositionTile, i, j);
+      }
+
+      if (i == mouseCellSelected.x && j == mouseCellSelected.y) {
+        drawTile(ctx, whiteTile, i, j, 0.7);
       }
     }
+  }
 }
 
 window.addEventListener('load', () => {
   const context2dProvider = Context2DProvider.getInstance();
-  const mouse = Mouse.getInstance();
+  const cursor = Mouse.getInstance();
   const ctx = context2dProvider.ctx;
   const changeSizeObserver = new CanvasChangeSizeObserver();
   changeSizeObserver.observe(context2dProvider.canvas);
 
   const tiles: ImageData[] = [];
-  tiles.push(new ImageData(grass));
+  tiles.push(new ImageData(green));
 
-  const grid = new Int32Array(9*9); // everything initialised to 0
+  const grid = new Int32Array(10*10);
 
   const render = () => {
 
@@ -52,8 +67,8 @@ window.addEventListener('load', () => {
     origin.set(TILE_SIZE.x * 5, TILE_SIZE.y * 5);
 
     const vMouse = {
-      x: mouse.x - (5 * TILE_SIZE.x),
-      y: mouse.y - (5 * TILE_SIZE.y)
+      x: cursor.x - (5 * TILE_SIZE.x),
+      y: cursor.y - (5 * TILE_SIZE.y)
     } as Vec2D;
     const vSelected = {
       x: Math.floor((vMouse.x + 2 * vMouse.y - Math.floor( TILE_SIZE.x / 2 )) / TILE_SIZE.x),
