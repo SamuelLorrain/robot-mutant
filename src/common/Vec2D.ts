@@ -27,5 +27,25 @@ export class Vec2D {
     }
   }
 
+  public add(v: Vec2D) {
+    return new Vec2D(
+      this.x + v.x,
+      this.y + v.y,
+    )
+  }
 
+  public sub(v: Vec2D) {
+    return new Vec2D(
+      this.x - v.x,
+      this.y - v.y,
+    )
+  }
+
+  public eq(v: Vec2D): boolean {
+    return this.x === v.x && this.y === v.y;
+  }
+
+  public almostEq(v: Vec2D, delta: number): boolean {
+    return Math.abs(this.x - v.x) <= delta && Math.abs(this.y - v.y) <= delta;
+  }
 }
