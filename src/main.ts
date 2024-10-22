@@ -10,6 +10,7 @@ import blue from "@/assets/tiles/blue.png";
 import white from "@/assets/tiles/white.png";
 import whiteSelection from "@/assets/tiles/white-selection.png";
 import selection from "@/assets/tiles/selection.png";
+import CanvasPanningListener from "./ui/infra/CanvasPanningListener";
 
 const TILE_SIZE = new Vec2D(32, 16);
 let origin = new Vec2D();
@@ -51,55 +52,13 @@ window.addEventListener('load', () => {
   const cursor = Mouse.getInstance();
   const ctx = context2dProvider.ctx;
   const changeSizeObserver = new CanvasChangeSizeObserver();
+  const panningListener = new CanvasPanningListener(context2dProvider.canvas);
   changeSizeObserver.observe(context2dProvider.canvas);
 
   const tiles: ImageData[] = [];
   tiles.push(new ImageData(green));
 
   const grid = new Int32Array(10*10);
-
-  let dragging = false;
-  let drag = new Vec2D(0,0);
-  let dragstart = new Vec2D(0,0);
-  let currentDragging = new Vec2D(0,0);
-
-  const canvas = context2dProvider.canvas;
-
-  canvas.addEventListener('mousedown', (e: MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    dragging = true;
-    currentDragging = new Vec2D(drag);
-    dragstart.set(
-      e.clientX * window.devicePixelRatio,
-      e.clientY * window.devicePixelRatio
-    )
-  });
-
-  canvas.addEventListener('mouseup', (e: MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    dragging = false;
-  });
-
-  canvas.addEventListener('mousemove', (e: MouseEvent) => {
-    if (!dragging) {
-      return;
-    }
-    const currentPosition = new Vec2D(
-      e.clientX * window.devicePixelRatio,
-      e.clientY * window.devicePixelRatio
-    )
-    if (dragstart.almostEq(currentPosition, 2)) {
-      return;
-    }
-
-    drag.set(new Vec2D(
-      e.clientX * window.devicePixelRatio - dragstart.x + currentDragging.x,
-      e.clientY * window.devicePixelRatio - dragstart.y + currentDragging.y
-    ));
-
-  });
 
   const render = () => {
 
@@ -108,11 +67,11 @@ window.addEventListener('load', () => {
       changeSizeObserver.width,
       changeSizeObserver.height
     );
-    origin.set(TILE_SIZE.x * 5 + drag.x, TILE_SIZE.y * 5 + drag.y);
+    origin.set(TILE_SIZE.x * 5 + panningListener.drag.x, TILE_SIZE.y * 5 + panningListener.drag.y);
 
     const vMouse = {
-      x: cursor.x - (5 * TILE_SIZE.x + drag.x),
-      y: cursor.y - (5 * TILE_SIZE.y + drag.y)
+      x: cursor.x - (5 * TILE_SIZE.x + panningListener.drag.x),
+      y: cursor.y - (5 * TILE_SIZE.y + panningListener.drag.y)
     } as Vec2D;
     const vSelected = {
       x: Math.floor((vMouse.x + 2 * vMouse.y - Math.floor( TILE_SIZE.x / 2 )) / TILE_SIZE.x),
