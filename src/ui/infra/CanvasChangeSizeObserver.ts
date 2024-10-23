@@ -1,7 +1,11 @@
+import { Vec2D } from "@/common/Vec2D";
+import Mouse from "./Mouse";
+
 export default class CanvasChangeSizeObserver {
   private readonly _resize_observer: ResizeObserver;
   private _width: number = 0;
   private _height: number = 0;
+  private _mouse: Mouse|null = null;
 
   constructor() {
     this._resize_observer = new ResizeObserver(this.onResize);
@@ -31,6 +35,12 @@ export default class CanvasChangeSizeObserver {
       }
       this._width = Math.round(width * dpr);
       this._height = Math.round(height * dpr);
+      if (this._mouse) {
+        this._mouse.canvasSize = new Vec2D(
+          this._width,
+          this._height
+        );
+      }
     }
   }
 
@@ -44,5 +54,9 @@ export default class CanvasChangeSizeObserver {
 
   public observe(canvas: HTMLCanvasElement) {
     this._resize_observer.observe(canvas, {box: 'content-box'});
+  }
+
+  public setMouse(mouse: Mouse) {
+    this._mouse = mouse;
   }
 }

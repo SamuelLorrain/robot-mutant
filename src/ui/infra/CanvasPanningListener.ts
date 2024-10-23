@@ -6,13 +6,15 @@ export default class CanvasPanningListener {
   private _drag: Vec2D;
   private _dragstart: Vec2D;
   private _currentDragging: Vec2D;
+  private _scale: number;
 
   constructor(canvas: HTMLCanvasElement) {
     this._canvas = canvas;
     this._dragging = false;
-    this._drag = new Vec2D();
+    this._drag = new Vec2D(1000, 200);
     this._dragstart = new Vec2D();
     this._currentDragging = new Vec2D();
+    this._scale = 1;
 
     this._canvas.addEventListener('mousedown', (e: MouseEvent) => {
       e.preventDefault();
@@ -20,8 +22,8 @@ export default class CanvasPanningListener {
       this._dragging = true;
       this._currentDragging = new Vec2D(this._drag);
       this._dragstart.set(
-        e.clientX * window.devicePixelRatio,
-        e.clientY * window.devicePixelRatio
+        (e.clientX * window.devicePixelRatio) / this._scale,
+        (e.clientY * window.devicePixelRatio) / this._scale
       )
     });
 
@@ -36,16 +38,16 @@ export default class CanvasPanningListener {
         return;
       }
       const currentPosition = new Vec2D(
-        e.clientX * window.devicePixelRatio,
-        e.clientY * window.devicePixelRatio
+        (e.clientX * window.devicePixelRatio) / this._scale,
+        (e.clientY * window.devicePixelRatio) / this._scale
       )
       if (this._dragstart.almostEq(currentPosition, 2)) {
         return;
       }
 
       this._drag.set(new Vec2D(
-        e.clientX * window.devicePixelRatio - this._dragstart.x + this._currentDragging.x,
-        e.clientY * window.devicePixelRatio - this._dragstart.y + this._currentDragging.y
+        (e.clientX * window.devicePixelRatio / this._scale) - this._dragstart.x + this._currentDragging.x,
+        (e.clientY * window.devicePixelRatio / this._scale) - this._dragstart.y + this._currentDragging.y
       ));
     });
   }
@@ -54,4 +56,7 @@ export default class CanvasPanningListener {
     return this._drag;
   };
 
+  public set scale(scale: number) {
+    this._scale = scale;
+  }
 }

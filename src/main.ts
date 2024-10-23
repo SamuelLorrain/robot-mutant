@@ -15,6 +15,7 @@ import CanvasPanningListener from "./ui/infra/CanvasPanningListener";
 const TILE_SIZE = new Vec2D(32, 16);
 let origin = new Vec2D();
 let player = new Vec2D(0, 5);
+let scale = 1;
 
 const pointerTile = new ImageData(selection);
 const playerPositionTile = new ImageData(blue);
@@ -53,12 +54,40 @@ window.addEventListener('load', () => {
   const ctx = context2dProvider.ctx;
   const changeSizeObserver = new CanvasChangeSizeObserver();
   const panningListener = new CanvasPanningListener(context2dProvider.canvas);
+  changeSizeObserver.setMouse(cursor);
   changeSizeObserver.observe(context2dProvider.canvas);
+
+  context2dProvider.canvas.style.scale = scale.toString();
+  panningListener.scale = scale;
+  cursor.scale = scale;
 
   const tiles: ImageData[] = [];
   tiles.push(new ImageData(green));
 
   const grid = new Int32Array(10*10);
+
+  context2dProvider.canvas.addEventListener('wheel', (e: WheelEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (Math.abs(e.deltaY) < 1) {
+      return;
+    }
+
+    const direction = e.deltaY < 0 ? 1 : -1;
+    const newScale = scale + direction;
+    if (newScale < 1) {
+      scale = 1
+    } else if (newScale > 6) {
+      scale = 6
+    } else {
+      scale = newScale;
+    }
+
+    context2dProvider.canvas.style.scale = scale.toString();
+    panningListener.scale = scale;
+    cursor.scale = scale;
+  }, { passive: false});
 
   const render = () => {
 
@@ -67,7 +96,10 @@ window.addEventListener('load', () => {
       changeSizeObserver.width,
       changeSizeObserver.height
     );
-    origin.set(TILE_SIZE.x * 5 + panningListener.drag.x, TILE_SIZE.y * 5 + panningListener.drag.y);
+    origin.set(
+      TILE_SIZE.x * 5 + panningListener.drag.x,
+      TILE_SIZE.y * 5 + panningListener.drag.y
+    );
 
     const vMouse = {
       x: cursor.x - (5 * TILE_SIZE.x + panningListener.drag.x),
@@ -79,6 +111,17 @@ window.addEventListener('load', () => {
     } as Vec2D;
 
     drawGrid(ctx, grid, tiles, vSelected);
+
+    ctx.beginPath();
+    ctx.strokeStyle = "red";
+    ctx.moveTo(cursor.x, 0);
+    ctx.lineTo(cursor.x, cursor.y);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.strokeStyle = "blue";
+    ctx.moveTo(0, cursor.y);
+    ctx.lineTo(cursor.x, cursor.y);
+    ctx.stroke();
 
     requestAnimationFrame(render);
   }
