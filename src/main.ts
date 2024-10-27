@@ -15,12 +15,10 @@ import CanvasPanningListener from "./ui/infra/CanvasPanningListener";
 const TILE_SIZE = new Vec2D(32, 16);
 let origin = new Vec2D();
 let player = new Vec2D(0, 5);
-let scale = 1;
+let scale = 5;
+let mapSize = new Vec2D(10,10);
 
-const pointerTile = new ImageData(selection);
-const playerPositionTile = new ImageData(blue);
 const whiteTile = new ImageData(white);
-const whiteSelectionTile = new ImageData(whiteSelection);
 
 function drawTile(ctx: CanvasRenderingContext2D, tile: ImageData, x: number, y: number, alpha: number = 1) {
   const drawX = origin.x + (x-y)*(TILE_SIZE.x/2);
@@ -33,13 +31,9 @@ function drawTile(ctx: CanvasRenderingContext2D, tile: ImageData, x: number, y: 
 
 
 function drawGrid(ctx: CanvasRenderingContext2D, grid: Int32Array, tiles: ImageData[], mouseCellSelected: Vec2D) {
-  for (let i = 0; i < 10; i++) {
-    for (let j = 0; j < 10; j++) {
+  for (let i = 0; i < mapSize.x; i++) {
+    for (let j = 0; j < mapSize.y; j++) {
       drawTile(ctx, tiles[grid[10*j + i]], i, j);
-
-      if (i == player.x && j == player.y) {
-        drawTile(ctx, playerPositionTile, i, j);
-      }
 
       if (i == mouseCellSelected.x && j == mouseCellSelected.y) {
         drawTile(ctx, whiteTile, i, j, 0.7);
@@ -53,7 +47,7 @@ window.addEventListener('load', () => {
   const cursor = Mouse.getInstance();
   const ctx = context2dProvider.ctx;
   const changeSizeObserver = new CanvasChangeSizeObserver();
-  const panningListener = new CanvasPanningListener(context2dProvider.canvas);
+  const panningListener = new CanvasPanningListener(context2dProvider.canvas, new Vec2D(1500, 700));
   changeSizeObserver.setMouse(cursor);
   changeSizeObserver.observe(context2dProvider.canvas);
 
@@ -64,7 +58,7 @@ window.addEventListener('load', () => {
   const tiles: ImageData[] = [];
   tiles.push(new ImageData(green));
 
-  const grid = new Int32Array(10*10);
+  const grid = new Int32Array(mapSize.x*mapSize.y);
 
   context2dProvider.canvas.addEventListener('wheel', (e: WheelEvent) => {
     e.preventDefault();
@@ -97,13 +91,13 @@ window.addEventListener('load', () => {
       changeSizeObserver.height
     );
     origin.set(
-      TILE_SIZE.x * 5 + panningListener.drag.x,
-      TILE_SIZE.y * 5 + panningListener.drag.y
+      panningListener.drag.x,
+      panningListener.drag.y
     );
 
     const vMouse = {
-      x: cursor.x - (5 * TILE_SIZE.x + panningListener.drag.x),
-      y: cursor.y - (5 * TILE_SIZE.y + panningListener.drag.y)
+      x: cursor.x - panningListener.drag.x,
+      y: cursor.y - panningListener.drag.y
     } as Vec2D;
     const vSelected = {
       x: Math.floor((vMouse.x + 2 * vMouse.y - Math.floor( TILE_SIZE.x / 2 )) / TILE_SIZE.x),
@@ -111,17 +105,6 @@ window.addEventListener('load', () => {
     } as Vec2D;
 
     drawGrid(ctx, grid, tiles, vSelected);
-
-    ctx.beginPath();
-    ctx.strokeStyle = "red";
-    ctx.moveTo(cursor.x, 0);
-    ctx.lineTo(cursor.x, cursor.y);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.strokeStyle = "blue";
-    ctx.moveTo(0, cursor.y);
-    ctx.lineTo(cursor.x, cursor.y);
-    ctx.stroke();
 
     requestAnimationFrame(render);
   }

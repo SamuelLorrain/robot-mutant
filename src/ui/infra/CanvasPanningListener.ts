@@ -8,10 +8,14 @@ export default class CanvasPanningListener {
   private _currentDragging: Vec2D;
   private _scale: number;
 
-  constructor(canvas: HTMLCanvasElement) {
+  constructor(canvas: HTMLCanvasElement, initialOffset?: Vec2D) {
     this._canvas = canvas;
     this._dragging = false;
-    this._drag = new Vec2D(1000, 200);
+    if (initialOffset == null) {
+      this._drag = new Vec2D();
+    } else {
+      this._drag = new Vec2D(initialOffset);
+    }
     this._dragstart = new Vec2D();
     this._currentDragging = new Vec2D();
     this._scale = 1;
