@@ -9,3 +9,10 @@ export class Context2DException extends UIException {
     this.name = "Context2DException";
   }
 }
+
+export class ImageDataException extends UIException {
+  constructor(msg: string) {
+    super(msg);
+    this.name = "ImageDataException";
+  }
+}

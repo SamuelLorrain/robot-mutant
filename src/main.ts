@@ -2,7 +2,7 @@ import "./style.css";
 import Context2DProvider from '@/ui/infra/Context2DProvider';
 import CanvasChangeSizeObserver from "@/ui/infra/CanvasChangeSizeObserver";
 import Mouse from "@/ui/infra/Mouse";
-import ImageData from "@/ui/infra/ImageData";
+import Picture from "@/ui/infra/Picture";
 import { Vec2D } from "@/common/Vec2D";
 
 import green from "@/assets/tiles/green.png";
@@ -18,19 +18,19 @@ let player = new Vec2D(0, 5);
 let scale = 5;
 let mapSize = new Vec2D(10,10);
 
-const whiteTile = new ImageData(white);
+const whiteTile = await Picture.createFromUri(white);
 
-function drawTile(ctx: CanvasRenderingContext2D, tile: ImageData, x: number, y: number, alpha: number = 1) {
+function drawTile(ctx: CanvasRenderingContext2D, tile: Picture, x: number, y: number, alpha: number = 1) {
   const drawX = origin.x + (x-y)*(TILE_SIZE.x/2);
   const drawY = origin.y + (x+y)*(TILE_SIZE.y/2);
   const previousAlpha = ctx.globalAlpha;
   ctx.globalAlpha = alpha;
-  ctx.drawImage(tile.imageData, drawX, drawY);
+  ctx.drawImage(tile.bitmap, drawX, drawY);
   ctx.globalAlpha = previousAlpha;
 }
 
 
-function drawGrid(ctx: CanvasRenderingContext2D, grid: Int32Array, tiles: ImageData[], mouseCellSelected: Vec2D) {
+function drawGrid(ctx: CanvasRenderingContext2D, grid: Int32Array, tiles: Picture[], mouseCellSelected: Vec2D) {
   for (let i = 0; i < mapSize.x; i++) {
     for (let j = 0; j < mapSize.y; j++) {
       drawTile(ctx, tiles[grid[10*j + i]], i, j);
@@ -42,7 +42,7 @@ function drawGrid(ctx: CanvasRenderingContext2D, grid: Int32Array, tiles: ImageD
   }
 }
 
-window.addEventListener('load', () => {
+window.addEventListener('load', async () => {
   const context2dProvider = Context2DProvider.getInstance();
   const cursor = Mouse.getInstance();
   const ctx = context2dProvider.ctx;
@@ -55,8 +55,8 @@ window.addEventListener('load', () => {
   panningListener.scale = scale;
   cursor.scale = scale;
 
-  const tiles: ImageData[] = [];
-  tiles.push(new ImageData(green));
+  const tiles: Picture[] = [];
+  tiles.push(await Picture.createFromUri(green));
 
   const grid = new Int32Array(mapSize.x*mapSize.y);
 
