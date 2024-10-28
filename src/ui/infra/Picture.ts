@@ -16,7 +16,7 @@ export default class Picture {
 
   static async bitmapFromBlob(blob: Blob|HTMLImageElement): Promise<ImageBitmap> {
     try {
-      return window.createImageBitmap(blob)
+      return window.createImageBitmap(blob, { resizeQuality: "pixelated"})
     } catch (e) {
       throw new ImageDataException(
         `Unable to create ImageBitmap:  ${(e as Error).toString()}`
