@@ -6,19 +6,17 @@ import Picture from "@/ui/infra/Picture";
 import { Vec2D } from "@/common/Vec2D";
 
 import green from "@/assets/tiles/green.png";
-import blue from "@/assets/tiles/blue.png";
 import white from "@/assets/tiles/white.png";
-import whiteSelection from "@/assets/tiles/white-selection.png";
-import selection from "@/assets/tiles/selection.png";
+
 import CanvasPanningListener from "./ui/infra/CanvasPanningListener";
+import ScaleProvider from "./ui/domain/ScaleProvider";
 
 const TILE_SIZE = new Vec2D(32, 16);
 let origin = new Vec2D();
-let player = new Vec2D(0, 5);
-let scale = 5;
+let scaleProvider = new ScaleProvider(1);
 let mapSize = new Vec2D(10,10);
 
-const whiteTile = await Picture.createFromUri(white);
+let whiteTile: Picture;
 
 function drawTile(ctx: CanvasRenderingContext2D, tile: Picture, x: number, y: number, alpha: number = 1) {
   const drawX = origin.x + (x-y)*(TILE_SIZE.x/2);
@@ -46,42 +44,22 @@ window.addEventListener('load', async () => {
   const context2dProvider = Context2DProvider.getInstance();
   const cursor = Mouse.getInstance();
   const ctx = context2dProvider.ctx;
-  const changeSizeObserver = new CanvasChangeSizeObserver();
   const panningListener = new CanvasPanningListener(context2dProvider.canvas, new Vec2D(1500, 700));
-  changeSizeObserver.setMouse(cursor);
-  changeSizeObserver.observe(context2dProvider.canvas);
+  const changeSizeObserver = new CanvasChangeSizeObserver(
+    context2dProvider.canvas,
+    cursor,
+    panningListener,
+    scaleProvider
+  );
 
-  context2dProvider.canvas.style.scale = scale.toString();
-  panningListener.scale = scale;
-  cursor.scale = scale;
+  context2dProvider.canvas.style.scale = scaleProvider.scale.toString();
+  panningListener.scale = scaleProvider.scale;
+  cursor.scale = scaleProvider.scale;
 
   const tiles: Picture[] = [];
   tiles.push(await Picture.createFromUri(green));
 
   const grid = new Int32Array(mapSize.x*mapSize.y);
-
-  context2dProvider.canvas.addEventListener('wheel', (e: WheelEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (Math.abs(e.deltaY) < 1) {
-      return;
-    }
-
-    const direction = e.deltaY < 0 ? 1 : -1;
-    const newScale = scale + direction;
-    if (newScale < 1) {
-      scale = 1
-    } else if (newScale > 6) {
-      scale = 6
-    } else {
-      scale = newScale;
-    }
-
-    context2dProvider.canvas.style.scale = scale.toString();
-    panningListener.scale = scale;
-    cursor.scale = scale;
-  }, { passive: false});
 
   const render = () => {
 
@@ -111,5 +89,3 @@ window.addEventListener('load', async () => {
 
   render();
 });
-
-

@@ -1,14 +1,31 @@
 import { Vec2D } from "@/common/Vec2D";
 import Mouse from "./Mouse";
+import CanvasPanningListener from "./CanvasPanningListener";
+import ScaleProvider from "../domain/ScaleProvider";
 
 export default class CanvasChangeSizeObserver {
   private readonly _resize_observer: ResizeObserver;
   private _width: number = 0;
   private _height: number = 0;
-  private _mouse: Mouse|null = null;
+  private readonly _canvas: HTMLCanvasElement;
+  private readonly _mouse: Mouse;
+  private readonly _panningListener: CanvasPanningListener;
+  private readonly _scaleProvider: ScaleProvider;
 
-  constructor() {
+
+  constructor(
+    canvas: HTMLCanvasElement,
+    mouse: Mouse,
+    panningListener: CanvasPanningListener,
+    scaleProvider: ScaleProvider
+  ) {
     this._resize_observer = new ResizeObserver(this.onResize);
+    this._resize_observer.observe(canvas, {box: 'content-box'});
+    this._mouse = mouse;
+    this._panningListener = panningListener;
+    this._canvas = canvas;
+    this._scaleProvider = scaleProvider;
+    this.createWheelEventListener()
   }
 
   /* From : https://webglfundamentals.org/webgl/lessons/webgl-resizing-the-canvas.html */
@@ -44,19 +61,36 @@ export default class CanvasChangeSizeObserver {
     }
   }
 
+  private createWheelEventListener() {
+    this._canvas.addEventListener('wheel', (e: WheelEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (Math.abs(e.deltaY) < 1) {
+        return;
+      }
+
+      const direction = e.deltaY < 0 ? 1 : -1;
+      const newScale = this._scaleProvider.scale + direction;
+      if (newScale < 1) {
+        this._scaleProvider.scale = 1
+      } else if (newScale > 6) {
+        this._scaleProvider.scale = 6
+      } else {
+        this._scaleProvider.scale = newScale;
+      }
+
+      this._canvas.style.scale = this._scaleProvider.scale.toString();
+      this._panningListener.scale = this._scaleProvider.scale;
+      this._mouse.scale = this._scaleProvider.scale;
+    }, { passive: false});
+  }
+
   public get width() {
     return this._width;
   }
 
   public get height() {
     return this._height;
-  }
-
-  public observe(canvas: HTMLCanvasElement) {
-    this._resize_observer.observe(canvas, {box: 'content-box'});
-  }
-
-  public setMouse(mouse: Mouse) {
-    this._mouse = mouse;
   }
 }
