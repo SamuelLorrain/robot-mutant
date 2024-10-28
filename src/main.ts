@@ -16,8 +16,6 @@ let origin = new Vec2D();
 let scaleProvider = new ScaleProvider(1);
 let mapSize = new Vec2D(10,10);
 
-let whiteTile: Picture;
-
 function drawTile(ctx: CanvasRenderingContext2D, tile: Picture, x: number, y: number, alpha: number = 1) {
   const drawX = origin.x + (x-y)*(TILE_SIZE.x/2);
   const drawY = origin.y + (x+y)*(TILE_SIZE.y/2);
@@ -28,13 +26,13 @@ function drawTile(ctx: CanvasRenderingContext2D, tile: Picture, x: number, y: nu
 }
 
 
-function drawGrid(ctx: CanvasRenderingContext2D, grid: Int32Array, tiles: Picture[], mouseCellSelected: Vec2D) {
+function drawGrid(ctx: CanvasRenderingContext2D, tiles: Picture[], mouseCellSelected: Vec2D) {
   for (let i = 0; i < mapSize.x; i++) {
     for (let j = 0; j < mapSize.y; j++) {
-      drawTile(ctx, tiles[grid[10*j + i]], i, j);
+      drawTile(ctx, tiles[0], i, j);
 
       if (i == mouseCellSelected.x && j == mouseCellSelected.y) {
-        drawTile(ctx, whiteTile, i, j, 0.7);
+        drawTile(ctx, tiles[1], i, j, 0.7);
       }
     }
   }
@@ -58,11 +56,9 @@ window.addEventListener('load', async () => {
 
   const tiles: Picture[] = [];
   tiles.push(await Picture.createFromUri(green));
-
-  const grid = new Int32Array(mapSize.x*mapSize.y);
+  tiles.push(await Picture.createFromUri(white));
 
   const render = () => {
-
     context2dProvider.paintBackground();
     context2dProvider.updateCanvasSize(
       changeSizeObserver.width,
@@ -82,7 +78,7 @@ window.addEventListener('load', async () => {
       y: Math.floor(( -vMouse.x + 2 * vMouse.y + Math.floor( TILE_SIZE.x / 2 )) / TILE_SIZE.x)
     } as Vec2D;
 
-    drawGrid(ctx, grid, tiles, vSelected);
+    drawGrid(ctx, tiles, vSelected);
 
     requestAnimationFrame(render);
   }
