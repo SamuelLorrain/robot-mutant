@@ -19,8 +19,8 @@ let mapSize = new Vec2D(10,10);
 let nbLevels = 16;
 
 function getCoordinateFromGrid(tile: Vec2D, nbLevel: number): Vec2D {
-  const drawX = origin.x + (tile.x-tile.y)*(TILE_SIZE.x/2);
-  const drawY = origin.y + (tile.x+tile.y)*(TILE_SIZE.y/2) - nbLevel*TILE_LEVEL_SIZE;
+  const drawX = Math.round(origin.x + (tile.x-tile.y)*(TILE_SIZE.x/2));
+  const drawY = Math.round(origin.y + (tile.x+tile.y)*(TILE_SIZE.y/2) - nbLevel*TILE_LEVEL_SIZE);
   return new Vec2D(
     drawX,
     drawY
