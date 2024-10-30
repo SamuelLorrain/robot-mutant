@@ -56,26 +56,6 @@ export class SpriteSheet {
     }
   }
 
-  public drawSpriteToPosition(
-    ctx: CanvasRenderingContext2D,
-    spriteNb: number,
-    positionX: number,
-    positionY: number
-  ) {
-    const sprite = this.getSprite(spriteNb);
-    ctx.drawImage(
-      this.picture.bitmap,
-      sprite.sX,
-      sprite.sY,
-      this.sizeSpriteX,
-      this.sizeSpriteY,
-      positionX,
-      positionY,
-      this.sizeSpriteX,
-      this.sizeSpriteY
-    )
-  }
-
 }
 
 export class SpriteSheetBuilder {

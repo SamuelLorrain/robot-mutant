@@ -5,8 +5,6 @@ import Mouse from "@/ui/infra/Mouse";
 import Picture from "@/ui/infra/Picture";
 import { Vec2D } from "@/common/Vec2D";
 
-import green from "@/assets/tiles/green.png";
-import white from "@/assets/tiles/white.png";
 import debugSpritesheet from "@/assets/debug.png"
 
 import CanvasPanningListener from "./ui/infra/CanvasPanningListener";
@@ -29,10 +27,26 @@ function getCoordinateFromGrid(tile: Vec2D, nbLevel: number): Vec2D {
   )
 }
 
+function drawSpriteToPosition(
+  ctx: Context2DProvider,
+  spriteSheet: SpriteSheet,
+  spriteNb: number,
+  positionX: number,
+  positionY: number
+) {
+  const sprite = spriteSheet.getSprite(spriteNb);
+  ctx.drawImage(
+    spriteSheet.picture,
+    new Vec2D(sprite.sX, sprite.sY),
+    new Vec2D(spriteSheet.sizeSpriteX, spriteSheet.sizeSpriteY),
+    new Vec2D(positionX, positionY),
+    new Vec2D(spriteSheet.sizeSpriteX, spriteSheet.sizeSpriteY)
+  )
+}
 
 
 function drawTileFromSpriteSheet(
-  ctx: CanvasRenderingContext2D,
+  ctx: Context2DProvider,
   spriteSheet: SpriteSheet,
   spriteNb: number,
   x: number,
@@ -44,11 +58,11 @@ function drawTileFromSpriteSheet(
     return;
   }
   const coordinates = getCoordinateFromGrid(new Vec2D(x,y), z);
-  spriteSheet.drawSpriteToPosition( ctx, spriteNb, coordinates.x, coordinates.y);
+  drawSpriteToPosition(ctx, spriteSheet, spriteNb, coordinates.x, coordinates.y);
 }
 
 function drawGrid(
-  ctx: CanvasRenderingContext2D,
+  ctx: Context2DProvider,
   spriteSheet: SpriteSheet,
   grid: number[][]
 ) {
@@ -67,7 +81,6 @@ window.addEventListener('load', async () => {
   const scaleProvider = new ScaleProvider(3);
   const context2dProvider = Context2DProvider.getInstance();
   const cursor = Mouse.getInstance();
-  const ctx = context2dProvider.ctx;
   const panningListener = new CanvasPanningListener(context2dProvider.canvas, new Vec2D(1500, 700));
   const changeSizeObserver = new CanvasChangeSizeObserver(
     context2dProvider.canvas,
@@ -79,10 +92,6 @@ window.addEventListener('load', async () => {
   context2dProvider.canvas.style.scale = scaleProvider.scale.toString();
   panningListener.scale = scaleProvider.scale;
   cursor.scale = scaleProvider.scale;
-
-  const tiles: Picture[] = [];
-  tiles.push(await Picture.createFromUri(green));
-  tiles.push(await Picture.createFromUri(white));
 
   const spriteSheetData = await Picture.createFromUri(debugSpritesheet);
   const spriteSheetBuilder = new SpriteSheetBuilder();
@@ -114,7 +123,7 @@ window.addEventListener('load', async () => {
       y: Math.floor(( -vMouse.x + 2 * vMouse.y + Math.floor( TILE_SIZE.x / 2 )) / TILE_SIZE.x)
     } as Vec2D;
 
-    drawGrid(ctx, spriteSheet, grid);
+    drawGrid(context2dProvider, spriteSheet, grid);
 
     requestAnimationFrame(render);
   }

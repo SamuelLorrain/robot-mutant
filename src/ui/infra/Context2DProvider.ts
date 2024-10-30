@@ -1,5 +1,7 @@
 import { Context2DException } from "@/ui/exceptions";
 import conf from '@/configuration';
+import { Vec2D } from "@/common/Vec2D";
+import Picture from "./Picture";
 
 /* Service class used to get the 2D context of the webpage */
 export default class Context2DProvider {
@@ -37,10 +39,6 @@ export default class Context2DProvider {
     return Context2DProvider._instance;
   }
 
-  public get ctx() {
-    return this._ctx;
-  }
-
   public get canvas() {
     return this._canvas;
   }
@@ -53,7 +51,31 @@ export default class Context2DProvider {
   }
 
   public paintBackground() {
-    this.ctx.fillStyle = conf.canvas.background;
-    this.ctx.fillRect(0,0, this.canvas.width, this.canvas.height);
+    this._ctx.fillStyle = conf.canvas.background;
+    this._ctx.fillRect(0,0, this.canvas.width, this.canvas.height);
+  }
+
+  /**
+  * Draw image on canvas, use the same arguments than ctx.drawImage.
+  * Except it takes Pictures and Vec2D as arguments instead of ImageData and plain numbers
+  * See: https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
+  */
+  public drawImage(picture: Picture, posSrc: Vec2D, sizeSrc?: never, posDst?: never, sizeDst?: never): void;
+  public drawImage(picture: Picture, posSrc: Vec2D, sizeSrc: Vec2D, posDst?: never, sizeDst?: never): void;
+  public drawImage(picture: Picture, posSrc: Vec2D, sizeSrc: Vec2D, posDst: Vec2D, sizeDst: Vec2D): void;
+  public drawImage(picture: Picture, posSrc: Vec2D, sizeSrc?: Vec2D, posDst?: Vec2D, sizeDst?: Vec2D) {
+    if (typeof(sizeSrc) === 'undefined') {
+      this._ctx.drawImage(picture.bitmap, posSrc.x, posSrc.y);
+    } else if (typeof(posDst) === 'undefined') {
+      this._ctx.drawImage(picture.bitmap, posSrc.x, posSrc.y, sizeSrc.x, sizeSrc.y);
+    } else {
+      this._ctx.drawImage(
+        picture.bitmap,
+        posSrc.x, posSrc.y,
+        sizeSrc.x, sizeSrc.y,
+        posDst.x, posDst.y,
+        (sizeDst as Vec2D).x, (sizeDst as Vec2D).y
+      );
+    }
   }
 }
