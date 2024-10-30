@@ -2,18 +2,19 @@ import Picture from "@/ui/infra/Picture";
 import { SpriteException } from "./exceptions";
 
 export type SpritePosition = {
+  image: ImageBitmap,
   width: number,
   height: number,
 
   /**
    * Position X in the sprite sheet
    */
-  posX: number,
+  sX: number,
 
   /**
    * Position Y in the sprite sheet
    */
-  posY: number
+  sY: number
 };
 
 export class SpriteSheet {
@@ -47,11 +48,32 @@ export class SpriteSheet {
     const y = Math.floor(spriteNb / this.nbSpritesRow);
 
     return {
+      image: this.picture.bitmap,
       width: this.sizeSpriteX,
       height: this.sizeSpriteY,
-      posX: x * this.sizeSpriteX,
-      posY: y * this.sizeSpriteY
+      sX: x * this.sizeSpriteX,
+      sY: y * this.sizeSpriteY
     }
+  }
+
+  public drawSpriteToPosition(
+    ctx: CanvasRenderingContext2D,
+    spriteNb: number,
+    positionX: number,
+    positionY: number
+  ) {
+    const sprite = this.getSprite(spriteNb);
+    ctx.drawImage(
+      this.picture.bitmap,
+      sprite.sX,
+      sprite.sY,
+      this.sizeSpriteX,
+      this.sizeSpriteY,
+      positionX,
+      positionY,
+      this.sizeSpriteX,
+      this.sizeSpriteY
+    )
   }
 
 }

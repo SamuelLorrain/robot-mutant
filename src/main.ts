@@ -7,38 +7,64 @@ import { Vec2D } from "@/common/Vec2D";
 
 import green from "@/assets/tiles/green.png";
 import white from "@/assets/tiles/white.png";
+import debugSpritesheet from "@/assets/debug.png"
 
 import CanvasPanningListener from "./ui/infra/CanvasPanningListener";
 import ScaleProvider from "./ui/domain/ScaleProvider";
+import { SpriteSheet, SpriteSheetBuilder } from "./game/SpriteSheet";
+import grid from "./level";
 
 const TILE_SIZE = new Vec2D(32, 16);
+const TILE_LEVEL_SIZE = 8;
 let origin = new Vec2D();
-let scaleProvider = new ScaleProvider(1);
 let mapSize = new Vec2D(10,10);
+let nbLevels = 16;
 
-function drawTile(ctx: CanvasRenderingContext2D, tile: Picture, x: number, y: number, alpha: number = 1) {
-  const drawX = origin.x + (x-y)*(TILE_SIZE.x/2);
-  const drawY = origin.y + (x+y)*(TILE_SIZE.y/2);
-  const previousAlpha = ctx.globalAlpha;
-  ctx.globalAlpha = alpha;
-  ctx.drawImage(tile.bitmap, drawX, drawY);
-  ctx.globalAlpha = previousAlpha;
+function getCoordinateFromGrid(tile: Vec2D, nbLevel: number): Vec2D {
+  const drawX = origin.x + (tile.x-tile.y)*(TILE_SIZE.x/2);
+  const drawY = origin.y + (tile.x+tile.y)*(TILE_SIZE.y/2) - nbLevel*TILE_LEVEL_SIZE;
+  return new Vec2D(
+    drawX,
+    drawY
+  )
 }
 
 
-function drawGrid(ctx: CanvasRenderingContext2D, tiles: Picture[], mouseCellSelected: Vec2D) {
+
+function drawTileFromSpriteSheet(
+  ctx: CanvasRenderingContext2D,
+  spriteSheet: SpriteSheet,
+  spriteNb: number,
+  x: number,
+  y: number,
+  z: number,
+) {
+  // Allow to skip levels
+  if (spriteNb < 0) {
+    return;
+  }
+  const coordinates = getCoordinateFromGrid(new Vec2D(x,y), z);
+  spriteSheet.drawSpriteToPosition( ctx, spriteNb, coordinates.x, coordinates.y);
+}
+
+function drawGrid(
+  ctx: CanvasRenderingContext2D,
+  spriteSheet: SpriteSheet,
+  grid: number[][]
+) {
   for (let i = 0; i < mapSize.x; i++) {
     for (let j = 0; j < mapSize.y; j++) {
-      drawTile(ctx, tiles[0], i, j);
-
-      if (i == mouseCellSelected.x && j == mouseCellSelected.y) {
-        drawTile(ctx, tiles[1], i, j, 0.7);
+      for (let k = 0; k < nbLevels; k++) {
+        if (grid[mapSize.x*j+i].length >= k) {
+          drawTileFromSpriteSheet(ctx, spriteSheet, grid[mapSize.x*j+i][k], i, j, k);
+        }
       }
     }
   }
 }
 
 window.addEventListener('load', async () => {
+  const scaleProvider = new ScaleProvider(3);
   const context2dProvider = Context2DProvider.getInstance();
   const cursor = Mouse.getInstance();
   const ctx = context2dProvider.ctx;
@@ -57,6 +83,16 @@ window.addEventListener('load', async () => {
   const tiles: Picture[] = [];
   tiles.push(await Picture.createFromUri(green));
   tiles.push(await Picture.createFromUri(white));
+
+  const spriteSheetData = await Picture.createFromUri(debugSpritesheet);
+  const spriteSheetBuilder = new SpriteSheetBuilder();
+  const spriteSheet = spriteSheetBuilder
+    .setPicture(spriteSheetData)
+    .setSizeSpriteX(32)
+    .setSizeSpriteY(32)
+    .setNbSpritesRow(4)
+    .setNbSpritesColumn(4)
+    .build()
 
   const render = () => {
     context2dProvider.paintBackground();
@@ -78,7 +114,7 @@ window.addEventListener('load', async () => {
       y: Math.floor(( -vMouse.x + 2 * vMouse.y + Math.floor( TILE_SIZE.x / 2 )) / TILE_SIZE.x)
     } as Vec2D;
 
-    drawGrid(ctx, tiles, vSelected);
+    drawGrid(ctx, spriteSheet, grid);
 
     requestAnimationFrame(render);
   }
