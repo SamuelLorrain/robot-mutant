@@ -1,20 +1,17 @@
 import Picture from "@/ui/infra/Picture";
 import { SpriteException } from "./exceptions";
+import { Vec2D } from "@/common/Vec2D";
 
 export type SpritePosition = {
-  image: ImageBitmap,
-  width: number,
-  height: number,
+  /**
+   * Size of each elements in the spritesheet
+   */
+  size: Vec2D,
 
   /**
-   * Position X in the sprite sheet
+   * Position of the current sprite in the spritesheet
    */
-  sX: number,
-
-  /**
-   * Position Y in the sprite sheet
-   */
-  sY: number
+  position: Vec2D,
 };
 
 export class SpriteSheet {
@@ -48,11 +45,14 @@ export class SpriteSheet {
     const y = Math.floor(spriteNb / this.nbSpritesRow);
 
     return {
-      image: this.picture.bitmap,
-      width: this.sizeSpriteX,
-      height: this.sizeSpriteY,
-      sX: x * this.sizeSpriteX,
-      sY: y * this.sizeSpriteY
+      size: new Vec2D(
+        this.sizeSpriteX,
+        this.sizeSpriteY,
+      ),
+      position: new Vec2D(
+        x * this.sizeSpriteX,
+        y * this.sizeSpriteY
+      )
     }
   }
 

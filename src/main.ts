@@ -37,10 +37,10 @@ function drawSpriteToPosition(
   const sprite = spriteSheet.getSprite(spriteNb);
   ctx.drawImage(
     spriteSheet.picture,
-    new Vec2D(sprite.sX, sprite.sY),
-    new Vec2D(spriteSheet.sizeSpriteX, spriteSheet.sizeSpriteY),
+    sprite.position,
+    sprite.size,
     new Vec2D(positionX, positionY),
-    new Vec2D(spriteSheet.sizeSpriteX, spriteSheet.sizeSpriteY)
+    sprite.size
   )
 }
 
