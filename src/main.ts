@@ -15,7 +15,7 @@ import grid from "./level";
 const TILE_SIZE = new Vec2D(32, 16);
 const TILE_LEVEL_SIZE = 8;
 let origin = new Vec2D();
-let mapSize = new Vec2D(10,10);
+let mapSize = new Vec2D(20,20);
 let nbLevels = 16;
 
 function getCoordinateFromGrid(tile: Vec2D, nbLevel: number): Vec2D {
