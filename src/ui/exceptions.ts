@@ -16,3 +16,10 @@ export class ImageDataException extends UIException {
     this.name = "ImageDataException";
   }
 }
+
+export class PictureException extends UIException {
+  constructor(msg: string) {
+    super(msg);
+    this.name = "ImageDataException";
+  }
+}
