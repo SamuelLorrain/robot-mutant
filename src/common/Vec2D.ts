@@ -41,6 +41,13 @@ export class Vec2D {
     )
   }
 
+  public mul(n: number) {
+    return new Vec2D(
+      this.x * n,
+      this.y * n,
+    )
+  }
+
   public eq(v: Vec2D): boolean {
     return this.x === v.x && this.y === v.y;
   }

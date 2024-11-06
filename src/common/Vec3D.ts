@@ -48,6 +48,14 @@ export class Vec3D {
     )
   }
 
+  public mul(n: number) {
+    return new Vec3D(
+      this.x * n,
+      this.y * n,
+      this.z * n,
+    )
+  }
+
   public eq(v: Vec3D): boolean {
     return this.x === v.x && this.y === v.y && this.z == v.z;
   }
