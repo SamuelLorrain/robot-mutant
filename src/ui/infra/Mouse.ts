@@ -39,12 +39,8 @@ export default class Mouse {
     return Mouse._instance;
   }
 
-  public get x() {
-    return this._mouseVec.x;
-  }
-
-  public get y() {
-    return this._mouseVec.y;
+  public get vec() {
+    return this._mouseVec;
   }
 
   public set scale(scale: number) {
