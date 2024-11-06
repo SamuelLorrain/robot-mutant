@@ -110,4 +110,8 @@ export class WorldMap {
   public get tiles() {
     return this._tiles;
   }
+
+  public get mapSize() {
+    return new Vec2D(this._mapSize);
+  }
 }

@@ -56,6 +56,9 @@ export class SpriteSheet {
     }
   }
 
+  public get size() {
+    return new Vec2D(this.sizeSpriteX, this.sizeSpriteY)
+  }
 }
 
 export class SpriteSheetBuilder {
