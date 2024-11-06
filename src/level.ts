@@ -5,7 +5,7 @@ import { SpriteSheetBuilder } from "./game/SpriteSheet";
 import { Vec2D } from "./common/Vec2D";
 
 const grid = [
-  [1, 0], [1], [1], [1], [1],
+  [1, 0], [1], [1], [1], [1, 0],
   [1], [1], [1], [1], [1],
   [1], [1], [1], [1], [1],
   [1], [1], [1], [1], [1],
