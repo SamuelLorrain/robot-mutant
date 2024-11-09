@@ -1,32 +1,49 @@
 import { WorldMap, WorldMapBuilder } from "./game/WorldMap";
-import debugSprites from "@/assets/debug.png"
+import test from "@/assets/test.png";
+import cursors from "@/assets/cursors.png";
 import Picture from "@/ui/infra/Picture";
-import { SpriteSheetBuilder } from "./game/SpriteSheet";
+import { SpriteSheet, SpriteSheetBuilder } from "./game/SpriteSheet";
 import { Vec2D } from "./common/Vec2D";
 
 const grid = [
-  [1, 0], [1], [1], [1], [1, 0],
-  [1], [1], [1], [1], [1],
-  [1], [1], [1], [1], [1],
-  [1], [1], [1], [1], [1],
-  [1], [1], [1], [1], [1],
+  [0, 1], [0, 1], [0], [0], [0], [0], [0], [0], [0], [0],
+  [0, 1], [0, 1], [0, 1], [0], [0], [0], [0], [0], [0], [0],
+  [0, 1], [0, 1], [0], [0], [0], [0], [0], [0], [0], [0],
+  [0, 0], [0], [0], [0], [0], [3], [0], [0], [0], [0],
+  [0, 0], [0], [2], [0], [3], [3], [3], [0], [0], [0],
+  [0, 0], [0], [0], [0], [0], [3], [3], [0], [0], [0],
+  [0, 0], [5], [6], [7], [8], [0], [0], [1], [0, 1], [0],
+  [0, 0], [0], [0], [0], [0], [0], [0], [-1], [-1], [0],
+  [0, 0], [0], [0], [0], [0], [0], [0], [0], [0], [0],
+  [0, 0], [0], [0], [0], [0], [0], [0], [0], [0], [0],
 ]
+
 
 
 const getMap = async (): Promise<WorldMap> => {
   const spriteSheet = (new SpriteSheetBuilder())
-    .setPicture(await Picture.createFromUri(debugSprites))
-    .setSizeSpriteX(32)
-    .setSizeSpriteY(32)
+    .setPicture(await Picture.createFromUri(test))
+    .setSizeSpriteX(64)
+    .setSizeSpriteY(64)
     .setNbSpritesRow(4)
     .setNbSpritesColumn(4)
     .build()
   const worldMap = (new WorldMapBuilder())
     .setSpriteSheet(spriteSheet)
-    .setMapSize(new Vec2D(5,5))
+    .setMapSize(new Vec2D(10,10))
     .buildFromArray(grid)
 
   return worldMap;
+}
+
+export const getCursors = async (): Promise<SpriteSheet> => {
+  return (new SpriteSheetBuilder())
+    .setPicture(await Picture.createFromUri(cursors))
+    .setSizeSpriteX(64)
+    .setSizeSpriteY(64)
+    .setNbSpritesRow(4)
+    .setNbSpritesColumn(4)
+    .build()
 }
 
 export default getMap;
