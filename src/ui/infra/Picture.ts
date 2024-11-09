@@ -33,6 +33,8 @@ export default class Picture {
 
   static imageDataFromBitmap(imageBitmap: ImageBitmap): ImageData {
     const canvas = document.createElement('canvas');
+    canvas.width = imageBitmap.width;
+    canvas.height = imageBitmap.height;
     const ctx = canvas.getContext('2d');
     if (ctx == null) {
       throw new PictureException("Unable to fetch Context2d while creating imageData from bitmap");
