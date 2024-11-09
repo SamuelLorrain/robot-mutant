@@ -5,8 +5,9 @@ import Mouse from "@/ui/infra/Mouse";
 import { Vec2D } from "@/common/Vec2D";
 import CanvasPanningListener from "./ui/infra/CanvasPanningListener";
 import ScaleProvider from "./ui/domain/ScaleProvider";
-import getMap from "./level";
+import getMap, { getCursors } from "./level";
 import { Tile, WorldMap } from "./game/WorldMap";
+import { SpriteSheet } from "./game/SpriteSheet";
 
 let origin = new Vec2D();
 
@@ -60,7 +61,7 @@ function getSelectedTiles(origin: Vec2D, map: WorldMap, cursor: Vec2D): Tile[] {
   return secondPassSelectedTiles;
 }
 
-function drawMap(ctx: Context2DProvider, origin: Vec2D, map: WorldMap, selectedTiles: Tile[]) {
+function drawMap(ctx: Context2DProvider, origin: Vec2D, map: WorldMap, selectedTiles: Tile[], cursors: SpriteSheet) {
   for (let tile of map.tiles) {
     if (tile.spriteNb < 0) {
       continue;
@@ -73,34 +74,33 @@ function drawMap(ctx: Context2DProvider, origin: Vec2D, map: WorldMap, selectedT
         isSelected = true;
       }
     }
+    ctx.drawImage(
+      tile.spriteSheet.picture,
+      tile.spriteSheet.getSprite(tile.spriteNb).position,
+      tile.spriteSheet.getSprite(tile.spriteNb).size,
+      new Vec2D(
+        Math.round(drawPos.x),
+        Math.round(drawPos.y)
+      ),
+      tile.spriteSheet.getSprite(tile.spriteNb).size
+    )
     if (isSelected) {
       ctx.drawImage(
-        tile.spriteSheet.picture,
-        tile.spriteSheet.getSprite(16).position,
-        tile.spriteSheet.getSprite(16).size,
+        cursors.picture,
+        cursors.getSprite(0).position,
+        cursors.getSprite(0).size,
         new Vec2D(
           Math.round(drawPos.x),
           Math.round(drawPos.y)
         ),
-        tile.spriteSheet.getSprite(16).size
-      )
-    } else {
-      ctx.drawImage(
-        tile.spriteSheet.picture,
-        tile.spriteSheet.getSprite(tile.spriteNb).position,
-        tile.spriteSheet.getSprite(tile.spriteNb).size,
-        new Vec2D(
-          Math.round(drawPos.x),
-          Math.round(drawPos.y)
-        ),
-        tile.spriteSheet.getSprite(tile.spriteNb).size
+        cursors.getSprite(tile.spriteNb).size
       )
     }
   }
 }
 
 window.addEventListener('load', async () => {
-  const scaleProvider = new ScaleProvider(1);
+  const scaleProvider = new ScaleProvider(3);
   const context2dProvider = Context2DProvider.getInstance();
   const cursor = Mouse.getInstance();
   const panningListener = new CanvasPanningListener(context2dProvider.canvas, new Vec2D(1500, 700));
@@ -116,6 +116,7 @@ window.addEventListener('load', async () => {
   cursor.scale = scaleProvider.scale;
 
   const map = await getMap();
+  const cursors = await getCursors();
 
   const render = () => {
     context2dProvider.paintBackground();
@@ -130,7 +131,7 @@ window.addEventListener('load', async () => {
     );
 
     const selectedTiles = getSelectedTiles(origin, map, cursor.vec);
-    drawMap(context2dProvider, origin, map, selectedTiles);
+    drawMap(context2dProvider, origin, map, selectedTiles, cursors);
     requestAnimationFrame(render);
   }
 
