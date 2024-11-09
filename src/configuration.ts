@@ -1,6 +1,6 @@
 export default {
   canvas: {
     querySelector: '#canvas',
-    background: 'lightblue'
+    background: '#22345c'
   },
 };
