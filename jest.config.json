@@ -1,0 +1,17 @@
+{
+  "preset": "ts-jest",
+  "testEnvironment": "jsdom",
+  "transform": {
+    "^.+\\.[tj]sx?$": "babel-jest"
+  },
+  "moduleNameMapper": {
+    "^@/(.*)$": "<rootDir>/src/$1"
+  },
+  "transformIgnorePatterns": [
+    "node_modules/(?!(vite|@vitejs|vue)/)"
+  ],
+  "setupFiles": [
+    "jest-canvas-mock"
+  ]
+}
+

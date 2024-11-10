@@ -1,4 +1,3 @@
-import { expect, test} from "vitest";
 import { Vec2D } from "./Vec2D";
 
 test('Should create Vec2D with numbers parameters', () => {

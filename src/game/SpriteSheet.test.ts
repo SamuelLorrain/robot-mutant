@@ -1,14 +1,6 @@
-import { expect, test, vi } from "vitest";
+import { Vec2D } from "@/common/Vec2D";
 import { SpriteSheet, SpriteSheetBuilder } from "./SpriteSheet";
 import Picture from "@/ui/infra/Picture";
-
-vi.stubGlobal('createImageBitmap', (): Promise<ImageBitmap> => {
-  return Promise.resolve({
-    width: 100,
-    height: 100,
-    close: vi.fn()
-  });
-})
 
 test('Can build SpriteSheet with the builder', async () => {
   const builder = new SpriteSheetBuilder()
@@ -38,45 +30,73 @@ test('Get good sprite position', async () => {
     .setNbSpritesRow(3)
     .build();
   expect(spriteSheet.getSprite(0)).toStrictEqual({
-    width: 16,
-    height: 24,
-    posX: 0,
-    posY: 0
+    size: new Vec2D(
+      16,
+      24
+    ),
+    position: new Vec2D(
+      0,
+      0
+    ),
   });
   expect(spriteSheet.getSprite(1)).toStrictEqual({
-    width: 16,
-    height: 24,
-    posX: 16,
-    posY: 0
+    size: new Vec2D(
+      16,
+      24
+    ),
+    position: new Vec2D(
+      16,
+      0
+    ),
   });
   expect(spriteSheet.getSprite(2)).toStrictEqual({
-    width: 16,
-    height: 24,
-    posX: 32,
-    posY: 0
+    size: new Vec2D(
+      16,
+      24
+    ),
+    position: new Vec2D(
+      32,
+      0
+    ),
   });
   expect(spriteSheet.getSprite(3)).toStrictEqual({
-    width: 16,
-    height: 24,
-    posX: 0,
-    posY: 24
+    size: new Vec2D(
+      16,
+      24
+    ),
+    position: new Vec2D(
+      0,
+      24
+    ),
   })
   expect(spriteSheet.getSprite(4)).toStrictEqual({
-    width: 16,
-    height: 24,
-    posX: 16,
-    posY: 24
+    size: new Vec2D(
+      16,
+      24
+    ),
+    position: new Vec2D(
+      16,
+      24
+    ),
   })
   expect(spriteSheet.getSprite(5)).toStrictEqual({
-    width: 16,
-    height: 24,
-    posX: 32,
-    posY: 24
+    size: new Vec2D(
+      16,
+      24,
+    ),
+    position: new Vec2D(
+      32,
+      24
+    ),
   })
   expect(spriteSheet.getSprite(6)).toStrictEqual({
-    width: 16,
-    height: 24,
-    posX: 0,
-    posY: 48
+    size: new Vec2D(
+      16,
+      24,
+    ),
+    position: new Vec2D(
+      0,
+      48
+    ),
   })
 });

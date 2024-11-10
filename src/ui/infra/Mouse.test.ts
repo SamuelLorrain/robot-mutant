@@ -1,4 +1,3 @@
-import { test, expect } from "vitest";
 import Mouse from "./Mouse";
 
 test('Can get instance of Mouse', () => {
@@ -15,8 +14,8 @@ test('Mouse should be a singleton', () => {
 
 test('Can get mouse components', () => {
   const instance = Mouse.getInstance();
-  expect(instance.x).toBeTypeOf('number');
-  expect(instance.y).toBeTypeOf('number');
+  expect(typeof instance.vec.x).toBe('number');
+  expect(typeof instance.vec.y).toBe('number');
 });
 
 test('Should change Mouse position on mousemove', () => {
@@ -26,6 +25,6 @@ test('Should change Mouse position on mousemove', () => {
     clientY: 300,
   });
   dispatchEvent(mouseEvent);
-  expect(instance.x).toBe(200);
-  expect(instance.y).toBe(300);
+  expect(instance.vec.x).toBe(200);
+  expect(instance.vec.y).toBe(300);
 });

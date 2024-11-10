@@ -1,21 +1,6 @@
-/**
- * @vitest-environment jsdom
- */
-import { expect, test, vi } from 'vitest'
 import Context2DProvider from "./Context2DProvider";
-import { JSDOM } from 'jsdom';
 
-
-const dom = new JSDOM(`
-<!DOCTYPE html>
-<html>
-<body>
-  <canvas id="canvas"></canvas>
-</body>
-</html>
-`);
-
-vi.stubGlobal('document', dom.window.document);
+document.body.innerHTML = `<canvas id="canvas"></canvas>`;
 
 test('can instantiate Context2DProvider', () => {
   const instance = Context2DProvider.getInstance();

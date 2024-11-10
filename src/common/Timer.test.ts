@@ -1,13 +1,12 @@
-import { expect, test} from "vitest";
-import Timer from "@/common/Timer";
+import { AutonomousTimer } from "@/common/Timer";
 
-test("Can create Timer instance", () => {
-  const timer = new Timer();
-  expect(timer).toBeInstanceOf(Timer);
+test("Can create AutonomousTimer instance", () => {
+  const timer = new AutonomousTimer();
+  expect(timer).toBeInstanceOf(AutonomousTimer);
 });
 
 test("Can start timer", () => {
-  const timer = new Timer();
+  const timer = new AutonomousTimer();
   timer.start();
   expect(timer.isStarted).toEqual(true);
 })
