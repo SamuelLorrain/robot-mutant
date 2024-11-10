@@ -144,6 +144,7 @@ window.addEventListener('load', async () => {
     );
 
     const selectedTiles = getSelectedTiles(origin, map, cursor.vec);
+    map.update(millisecondsDt);
 
     if (accumulatedDt >= TICKS_PER_FRAME) {
       // new draw if we are not capping fps
