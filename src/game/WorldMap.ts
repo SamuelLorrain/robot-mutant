@@ -3,6 +3,7 @@ import { SpriteSheet } from "./SpriteSheet";
 import { WorldMapException } from "./exceptions";
 import { Vec3D } from "@/common/Vec3D";
 import { TILE_LEVEL_SIZE, TILE_SIZE } from "@/globals";
+import { Tile, StaticTile } from "@/game/Tile";
 
 export class WorldMapBuilder {
   private _spriteSheet: SpriteSheet|undefined = undefined;
@@ -40,7 +41,7 @@ not equal to mapSize (${this._mapSize.x*this._mapSize.y})`);
         const tower = tilesArray[mapSize.x*j+i];
         for (let k = 0; k < tower.length; k++) {
           const pos = new Vec3D(i,j,k);
-          tiles.push(new Tile(
+          tiles.push(new StaticTile(
             pos,
             this._getDrawPos(pos),
             this._spriteSheet as SpriteSheet,
@@ -60,43 +61,6 @@ not equal to mapSize (${this._mapSize.x*this._mapSize.y})`);
     )
   }
 }
-
-
-export class Tile {
-  private _pos: Vec3D;
-  private _drawPos: Vec2D;
-  private _spriteSheet: SpriteSheet;
-  private _spriteNb: number;
-
-  constructor(
-    pos: Vec3D,
-    drawPos: Vec2D,
-    spriteSheet: SpriteSheet,
-    spriteNb: number,
-  ) {
-    this._pos = pos;
-    this._drawPos = drawPos;
-    this._spriteSheet = spriteSheet;
-    this._spriteNb = spriteNb;
-  }
-
-  public get position() {
-    return this._pos;
-  }
-
-  public get drawPos() {
-    return this._drawPos;
-  }
-
-  public get spriteSheet() {
-    return this._spriteSheet;
-  }
-
-  public get spriteNb() {
-    return this._spriteNb;
-  }
-}
-
 
 export class WorldMap {
   private _tiles: Tile[]
