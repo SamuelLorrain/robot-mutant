@@ -4,6 +4,7 @@ import { WorldMapException } from "./exceptions";
 import { Vec3D } from "@/common/Vec3D";
 import { TILE_LEVEL_SIZE, TILE_SIZE } from "@/globals";
 import { Tile, StaticTile } from "@/game/Tile";
+import { AnimatedTile, AnimationTileTimelineFrame } from "@/game/AnimatedTile";
 
 export class WorldMapBuilder {
   private _spriteSheet: SpriteSheet|undefined = undefined;
@@ -19,7 +20,7 @@ export class WorldMapBuilder {
     return this;
   }
 
-  public buildFromArray(tilesArray: number[][]) {
+  public buildFromArray(tilesArray: (number|AnimationTileTimelineFrame[])[][]) {
     if (this._spriteSheet == null) {
       throw new WorldMapException("Unable to build world map, spriteSheet is not set");
     }
@@ -34,24 +35,39 @@ tilesArray length (${tilesArray.length})
 not equal to mapSize (${this._mapSize.x*this._mapSize.y})`);
     }
     const tiles: Tile[] = [];
+    const animatedTiles: AnimatedTile[] = [];
     const mapSize = this._mapSize as Vec2D;
 
     for (let i = 0; i < mapSize.x; i++) {
       for (let j = 0; j < mapSize.y; j++) {
-        const tower = tilesArray[mapSize.x*j+i];
-        for (let k = 0; k < tower.length; k++) {
+        const tileLevels = tilesArray[mapSize.x*j+i];
+        for (let k = 0; k < tileLevels.length; k++) {
+          const tileInformations = tilesArray[mapSize.x*j+i][k];
           const pos = new Vec3D(i,j,k);
-          tiles.push(new StaticTile(
-            pos,
-            this._getDrawPos(pos),
-            this._spriteSheet as SpriteSheet,
-            tilesArray[mapSize.x*j+i][k]
-          ))
+
+          if (typeof tileInformations == 'number') {
+            tiles.push(new StaticTile(
+              pos,
+              this._getDrawPos(pos),
+              this._spriteSheet as SpriteSheet,
+              tileInformations
+            ))
+          } else if (tileInformations instanceof Array) {
+            const newAnimatedTile = new AnimatedTile(
+              pos,
+              this._getDrawPos(pos),
+              this._spriteSheet as SpriteSheet,
+              tileInformations
+            );
+            tiles.push(newAnimatedTile);
+            animatedTiles.push(newAnimatedTile);
+          }
+
         }
       }
     }
 
-    return new WorldMap(tiles, mapSize);
+    return new WorldMap(tiles, mapSize, animatedTiles);
   }
 
   private _getDrawPos(pos: Vec3D) {
@@ -64,11 +80,22 @@ not equal to mapSize (${this._mapSize.x*this._mapSize.y})`);
 
 export class WorldMap {
   private _tiles: Tile[]
+
+  /*
+   * Point directly to animated tiles
+   * Those tiles should also be referenced in
+   * the _tiles member. It's just here
+   * to have convenient reference to animatedTiles
+   * to update them in the `update()` method.
+   */
+  private _animatedTiles: AnimatedTile[];
+
   private _mapSize: Vec2D;
 
-  constructor(tiles: Tile[], mapSize: Vec2D) {
+  constructor(tiles: Tile[], mapSize: Vec2D, animatedTiles: AnimatedTile[]) {
     this._tiles = tiles;
     this._mapSize = mapSize;
+    this._animatedTiles = animatedTiles;
   }
 
   public get tiles() {
@@ -77,5 +104,11 @@ export class WorldMap {
 
   public get mapSize() {
     return new Vec2D(this._mapSize);
+  }
+
+  public update(delta: DOMHighResTimeStamp) {
+    for (let tile of this._animatedTiles) {
+      tile.updateTimeline(delta);
+    }
   }
 }
