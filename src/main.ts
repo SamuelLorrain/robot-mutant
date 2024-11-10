@@ -8,6 +8,8 @@ import ScaleProvider from "./ui/domain/ScaleProvider";
 import getMap, { getCursors } from "./level";
 import { Tile, WorldMap } from "./game/WorldMap";
 import { SpriteSheet } from "./game/SpriteSheet";
+import { AutonomousTimer } from "./common/Timer";
+import { TICKS_PER_FRAME } from "./globals";
 
 let origin = new Vec2D();
 
@@ -118,22 +120,40 @@ window.addEventListener('load', async () => {
   const map = await getMap();
   const cursors = await getCursors();
 
-  const render = () => {
-    context2dProvider.paintBackground();
+  const capTimer = new AutonomousTimer();
+  capTimer.start();
+
+  let lastTime = 0;
+  let countedFrames = 0;
+  let accumulatedDt = 0;
+
+  const gameLoop = () => {
+    const now = capTimer.getTicks();
+    const millisecondsDt = now - lastTime;
+    lastTime = now;
+    accumulatedDt += millisecondsDt;
+
     context2dProvider.updateCanvasSize(
       changeSizeObserver.width,
       changeSizeObserver.height
     );
-
     origin.set(
       panningListener.drag.x,
       panningListener.drag.y
     );
 
     const selectedTiles = getSelectedTiles(origin, map, cursor.vec);
-    drawMap(context2dProvider, origin, map, selectedTiles, cursors);
-    requestAnimationFrame(render);
+
+    if (accumulatedDt >= TICKS_PER_FRAME) {
+      // new draw if we are not capping fps
+      context2dProvider.paintBackground();
+      drawMap(context2dProvider, origin, map, selectedTiles, cursors);
+      accumulatedDt = 0;
+    }
+
+    countedFrames++;
+    requestAnimationFrame(gameLoop);
   }
 
-  render();
+  gameLoop();
 });
