@@ -34,19 +34,20 @@ export class WorldMapBuilder {
 tilesArray length (${tilesArray.length})
 not equal to mapSize (${this._mapSize.x*this._mapSize.y})`);
     }
-    const tiles: Tile[] = [];
+    const tiles: Tile[][] = [];
     const animatedTiles: AnimatedTile[] = [];
     const mapSize = this._mapSize as Vec2D;
 
-    for (let i = 0; i < mapSize.x; i++) {
-      for (let j = 0; j < mapSize.y; j++) {
+    for (let i = 0; i < mapSize.y; i++) {
+      for (let j = 0; j < mapSize.x; j++) {
         const tileLevels = tilesArray[mapSize.x*j+i];
+        tiles.push([]);
         for (let k = 0; k < tileLevels.length; k++) {
           const tileInformations = tilesArray[mapSize.x*j+i][k];
           const pos = new Vec3D(i,j,k);
 
           if (typeof tileInformations == 'number') {
-            tiles.push(new StaticTile(
+            tiles[tiles.length-1].push(new StaticTile(
               pos,
               this._getDrawPos(pos),
               this._spriteSheet as SpriteSheet,
@@ -59,7 +60,7 @@ not equal to mapSize (${this._mapSize.x*this._mapSize.y})`);
               this._spriteSheet as SpriteSheet,
               tileInformations
             );
-            tiles.push(newAnimatedTile);
+            tiles[tiles.length-1].push(newAnimatedTile);
             animatedTiles.push(newAnimatedTile);
           }
 
@@ -79,7 +80,7 @@ not equal to mapSize (${this._mapSize.x*this._mapSize.y})`);
 }
 
 export class WorldMap {
-  private _tiles: Tile[]
+  private _tiles: Tile[][]
 
   /*
    * Point directly to animated tiles
@@ -92,7 +93,7 @@ export class WorldMap {
 
   private _mapSize: Vec2D;
 
-  constructor(tiles: Tile[], mapSize: Vec2D, animatedTiles: AnimatedTile[]) {
+  constructor(tiles: Tile[][], mapSize: Vec2D, animatedTiles: AnimatedTile[]) {
     this._tiles = tiles;
     this._mapSize = mapSize;
     this._animatedTiles = animatedTiles;

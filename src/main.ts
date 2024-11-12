@@ -5,32 +5,36 @@ import Mouse from "@/ui/infra/Mouse";
 import { Vec2D } from "@/common/Vec2D";
 import CanvasPanningListener from "./ui/infra/CanvasPanningListener";
 import ScaleProvider from "./ui/domain/ScaleProvider";
-import getMap, { getCursors } from "./level";
+import getMap, { getBlueCharacter, getRedCharacter, getCursors } from "./level";
 import { WorldMap } from "./game/WorldMap";
 import { Tile } from "./game/Tile";
 import { SpriteSheet } from "./game/SpriteSheet";
 import { AutonomousTimer } from "./common/Timer";
 import { TICKS_PER_FRAME } from "./globals";
+import { Character } from "./game/Character";
+import { Vec3D } from "./common/Vec3D";
 
 let origin = new Vec2D();
 
 function getSelectedTiles(origin: Vec2D, map: WorldMap, cursor: Vec2D): Tile[] {
   const firstPassSelectedTiles: Tile[] = [];
-  for (let tile of map.tiles) {
-    if (tile.spriteNb < 0) {
-      continue;
-    }
-    const drawPos = tile.drawPos.add(origin);
+  for (let tileTower of map.tiles) {
+    for (let tile of tileTower) {
+      if (tile.spriteNb < 0) {
+        continue;
+      }
+      const drawPos = tile.drawPos.add(origin);
 
-    /*
-    * Optimisation.
-    * Only verify pixels on "almost certains" tiles.
-    * TODO verify if the optimisation worth.
-    */
-    if ((drawPos.x < cursor.x && (drawPos.x + tile.spriteSheet.size.x) >= cursor.x)
-        &&
-        (drawPos.y < cursor.y && (drawPos.y + tile.spriteSheet.size.y) >= cursor.y)) {
-      firstPassSelectedTiles.push(tile);
+      /*
+      * Optimisation.
+      * Only verify pixels on "almost certains" tiles.
+      * TODO verify if the optimisation worth.
+      */
+      if ((drawPos.x < cursor.x && (drawPos.x + tile.spriteSheet.size.x) >= cursor.x)
+          &&
+          (drawPos.y < cursor.y && (drawPos.y + tile.spriteSheet.size.y) >= cursor.y)) {
+        firstPassSelectedTiles.push(tile);
+      }
     }
   }
 
@@ -65,39 +69,41 @@ function getSelectedTiles(origin: Vec2D, map: WorldMap, cursor: Vec2D): Tile[] {
 }
 
 function drawMap(ctx: Context2DProvider, origin: Vec2D, map: WorldMap, selectedTiles: Tile[], cursors: SpriteSheet) {
-  for (let tile of map.tiles) {
-    if (tile.spriteNb < 0) {
-      continue;
-    }
-    const pos = tile.position;
-    const drawPos = tile.drawPos.add(origin);
-    let isSelected = false;
-    for(let selectedTile of selectedTiles) {
-      if (selectedTile.position.eq(pos)) {
-        isSelected = true;
+  for (let tileTower of map.tiles) {
+    for (let tile of tileTower) {
+      if (tile.spriteNb < 0) {
+        continue;
       }
-    }
-    ctx.drawImage(
-      tile.spriteSheet.picture,
-      tile.spriteSheet.getSprite(tile.spriteNb).position,
-      tile.spriteSheet.getSprite(tile.spriteNb).size,
-      new Vec2D(
-        Math.round(drawPos.x),
-        Math.round(drawPos.y)
-      ),
-      tile.spriteSheet.getSprite(tile.spriteNb).size
-    )
-    if (isSelected) {
+      const pos = tile.position;
+      const drawPos = tile.drawPos.add(origin);
+      let isSelected = false;
+      for(let selectedTile of selectedTiles) {
+        if (selectedTile.position.eq(pos)) {
+          isSelected = true;
+        }
+      }
       ctx.drawImage(
-        cursors.picture,
-        cursors.getSprite(0).position,
-        cursors.getSprite(0).size,
+        tile.spriteSheet.picture,
+        tile.spriteSheet.getSprite(tile.spriteNb).position,
+        tile.spriteSheet.getSprite(tile.spriteNb).size,
         new Vec2D(
           Math.round(drawPos.x),
           Math.round(drawPos.y)
         ),
-        cursors.getSprite(tile.spriteNb).size
+        tile.spriteSheet.getSprite(tile.spriteNb).size
       )
+      if (isSelected) {
+        ctx.drawImage(
+          cursors.picture,
+          cursors.getSprite(0).position,
+          cursors.getSprite(0).size,
+          new Vec2D(
+            Math.round(drawPos.x),
+            Math.round(drawPos.y)
+          ),
+          cursors.getSprite(tile.spriteNb).size
+        )
+      }
     }
   }
 }
@@ -120,6 +126,8 @@ window.addEventListener('load', async () => {
 
   const map = await getMap();
   const cursors = await getCursors();
+  const blueSpriteSheet = await getBlueCharacter();
+  const redSpriteSheet = await getRedCharacter();
 
   const capTimer = new AutonomousTimer();
   capTimer.start();
