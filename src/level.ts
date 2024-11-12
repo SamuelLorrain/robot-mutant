@@ -1,5 +1,5 @@
 import { WorldMap, WorldMapBuilder } from "./game/WorldMap";
-import test from "@/assets/test.png";
+import tiles  from "@/assets/tiles.png";
 import cursors from "@/assets/cursors.png";
 import Picture from "@/ui/infra/Picture";
 import { SpriteSheet, SpriteSheetBuilder } from "./game/SpriteSheet";
@@ -7,7 +7,7 @@ import { Vec2D } from "./common/Vec2D";
 
 const grid = [
   [0, 1], [0, 1], [0], [0], [0], [0], [0], [0], [0], [0],
-  [0, 1], [0, 1], [0, 1], [0], [0], [0], [0], [0], [0], [0],
+  [0, 1], [0, 1], [0, 1], [[{durationMs: 500, spriteNb: 9}, {durationMs: 500, spriteNb: 10}]], [0], [0], [0], [0], [0], [0],
   [0, 1], [0, 1], [0], [0], [0], [0], [0], [0], [0], [0],
   [0, 0], [0], [0], [0], [0], [3], [0], [0], [0], [0],
   [0, 0], [0], [2], [0], [3], [3], [3], [0], [0], [0],
@@ -15,14 +15,16 @@ const grid = [
   [0, 0], [5], [6], [7], [8], [0], [0], [1], [0, 1], [0],
   [0, 0], [0], [0], [0], [0], [0], [0], [-1], [-1], [0],
   [0, 0], [0], [0], [0], [0], [0], [0], [0], [0], [0],
-  [0, 0], [[{durationMs: 300, spriteNb: 9}, {durationMs: 300, spriteNb: 10}]], [0], [0], [0], [0], [0], [0], [0], [0],
+  [0, 0],
+  [[{durationMs: 500, spriteNb: 9}, {durationMs: 500, spriteNb: 10}]],
+  [[{durationMs: 500, spriteNb: 9}, {durationMs: 500, spriteNb: 10}]],
+  [[{durationMs: 500, spriteNb: 9}, {durationMs: 500, spriteNb: 10}]],
+  [[{durationMs: 500, spriteNb: 9}, {durationMs: 500, spriteNb: 10}]], [0], [0], [0], [0], [0],
 ]
-
-
 
 const getMap = async (): Promise<WorldMap> => {
   const spriteSheet = (new SpriteSheetBuilder())
-    .setPicture(await Picture.createFromUri(test))
+    .setPicture(await Picture.createFromUri(tiles))
     .setSizeSpriteX(64)
     .setSizeSpriteY(64)
     .setNbSpritesRow(4)
