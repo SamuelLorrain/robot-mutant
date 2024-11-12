@@ -5,7 +5,7 @@ class GameException extends Error {
 export class WorldMapException extends GameException {
   constructor(msg: string) {
     super(msg);
-    this.name = "GameGridException";
+    this.name = "WorldMapException";
   }
 }
 
