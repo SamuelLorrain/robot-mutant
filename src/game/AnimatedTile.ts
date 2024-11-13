@@ -15,6 +15,7 @@ export class AnimatedTile implements Tile {
   private _currentSpriteNb: number;
   private _timeline: AnimationTileTimelineFrame[];
   private _ticks: DOMHighResTimeStamp;
+  private _paused: boolean;
 
   constructor(
     pos: Vec3D,
@@ -28,10 +29,18 @@ export class AnimatedTile implements Tile {
     this._timeline = timeline;
     this._currentSpriteNb = 0;
     this._ticks = 0;
+    this._paused = false;
   }
 
   public updateTimeline(dt: DOMHighResTimeStamp) {
+    if (this._paused) {
+      return;
+    }
     this._ticks += dt;
+    this.updateSpriteAccordingToTimeline();
+  }
+
+  public updateSpriteAccordingToTimeline() {
     if (this._ticks >= this._timeline[this._currentSpriteNb].durationMs) {
       this._ticks = this._ticks % this._timeline[this._currentSpriteNb].durationMs;
       this._currentSpriteNb = (this._currentSpriteNb + 1) % this._timeline.length;
@@ -56,5 +65,18 @@ export class AnimatedTile implements Tile {
 
   public get ticks() {
     return this._ticks;
+  }
+
+  public set ticks(ticks: number) {
+    this._ticks = ticks;
+    this.updateSpriteAccordingToTimeline();
+  }
+
+  public restart() {
+    this._ticks = 0;
+  }
+
+  public set paused(pauseStatus: boolean) {
+    this._paused = pauseStatus;
   }
 }
