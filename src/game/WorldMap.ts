@@ -103,6 +103,10 @@ export class WorldMap {
     return this._tiles;
   }
 
+  public tile(pos: Vec3D) {
+    return this.tiles[this.mapSize.y*pos.y+pos.x][pos.z]
+  }
+
   public get mapSize() {
     return new Vec2D(this._mapSize);
   }

@@ -5,7 +5,7 @@ import Mouse from "@/ui/infra/Mouse";
 import { Vec2D } from "@/common/Vec2D";
 import CanvasPanningListener from "./ui/infra/CanvasPanningListener";
 import ScaleProvider from "./ui/domain/ScaleProvider";
-import getMap, { getBlueCharacter, getRedCharacter, getCursors } from "./level";
+import getMap, { getCursors, getRedCharacter } from "./level";
 import { WorldMap } from "./game/WorldMap";
 import { Tile } from "./game/Tile";
 import { SpriteSheet } from "./game/SpriteSheet";
@@ -68,7 +68,15 @@ function getSelectedTiles(origin: Vec2D, map: WorldMap, cursor: Vec2D): Tile[] {
   return secondPassSelectedTiles;
 }
 
-function drawMap(ctx: Context2DProvider, origin: Vec2D, map: WorldMap, selectedTiles: Tile[], cursors: SpriteSheet) {
+function drawMap(
+  ctx: Context2DProvider,
+  origin: Vec2D,
+  map: WorldMap,
+  selectedTiles: Tile[],
+  cursors: SpriteSheet,
+  character: Character,
+  characterSpriteSheet: SpriteSheet
+) {
   for (let tileTower of map.tiles) {
     for (let tile of tileTower) {
       if (tile.spriteNb < 0) {
@@ -95,13 +103,26 @@ function drawMap(ctx: Context2DProvider, origin: Vec2D, map: WorldMap, selectedT
       if (isSelected) {
         ctx.drawImage(
           cursors.picture,
-          cursors.getSprite(0).position,
-          cursors.getSprite(0).size,
+          cursors.getSprite(2).position,
+          cursors.getSprite(2).size,
           new Vec2D(
             Math.round(drawPos.x),
             Math.round(drawPos.y)
           ),
           cursors.getSprite(tile.spriteNb).size
+        )
+      }
+      if (character.pos.eq(tile.position)) {
+        const characterDrawPos = character.drawPos.add(origin);
+        ctx.drawImage(
+          characterSpriteSheet.picture,
+          characterSpriteSheet.getSprite(1).position,
+          characterSpriteSheet.getSprite(1).size,
+          new Vec2D(
+            Math.round(characterDrawPos.x),
+            Math.round(characterDrawPos.y)
+          ),
+          characterSpriteSheet.getSprite(1).size
         )
       }
     }
@@ -126,8 +147,11 @@ window.addEventListener('load', async () => {
 
   const map = await getMap();
   const cursors = await getCursors();
-  const blueSpriteSheet = await getBlueCharacter();
   const redSpriteSheet = await getRedCharacter();
+  const c = new Character()
+  c.pos = new Vec3D(1, 1, 1);
+  const tileToMap = map.tile(c.pos);
+  c.drawPos = tileToMap.drawPos;
 
   const capTimer = new AutonomousTimer();
   capTimer.start();
@@ -157,7 +181,15 @@ window.addEventListener('load', async () => {
     if (accumulatedDt >= TICKS_PER_FRAME) {
       // new draw if we are not capping fps
       context2dProvider.paintBackground();
-      drawMap(context2dProvider, origin, map, selectedTiles, cursors);
+      drawMap(
+        context2dProvider,
+        origin,
+        map,
+        selectedTiles,
+        cursors,
+        c,
+        redSpriteSheet
+      );
       accumulatedDt = 0;
     }
 
