@@ -56,7 +56,7 @@ export const getBlueCharacter = async (): Promise<SpriteSheet> => {
     .setSizeSpriteX(64)
     .setSizeSpriteY(64)
     .setNbSpritesRow(8)
-    .setNbSpritesColumn(4)
+    .setNbSpritesColumn(8)
     .build();
 }
 
@@ -66,7 +66,7 @@ export const getRedCharacter = async (): Promise<SpriteSheet> => {
     .setSizeSpriteX(64)
     .setSizeSpriteY(64)
     .setNbSpritesRow(8)
-    .setNbSpritesColumn(4)
+    .setNbSpritesColumn(8)
     .build();
 }
 
