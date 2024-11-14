@@ -63,4 +63,8 @@ export default class CanvasPanningListener {
   public set scale(scale: number) {
     this._scale = scale;
   }
+
+  public set drag(vec: Vec2D) {
+    this._drag = new Vec2D(vec);
+  }
 }

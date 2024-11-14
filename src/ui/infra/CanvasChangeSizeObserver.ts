@@ -59,6 +59,7 @@ export default class CanvasChangeSizeObserver {
         );
       }
     }
+    this._panningListener.drag = new Vec2D(this._width/2, this._height/2);
   }
 
   private createWheelEventListener() {
