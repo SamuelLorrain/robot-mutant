@@ -111,5 +111,15 @@ export class Character {
   public move(pos: Vec3D, map: WorldMap) {
     this._target = map.tile(pos).position;
     this._targetDrawPos = map.tile(pos).drawPos;
+
+    if (this._target.x > this._pos.x) {
+      this.direction = "left";
+    } else if (this._target.x < this._pos.x) {
+      this.direction = "right";
+    } else if (this._target.y > this._pos.y) {
+      this.direction = "front";
+    } else if (this._target.y < this._pos.y) {
+      this.direction = "back";
+    }
   }
 }
