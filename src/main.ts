@@ -11,8 +11,9 @@ import { Tile } from "./game/Tile";
 import { SpriteSheet } from "./game/SpriteSheet";
 import { AutonomousTimer } from "./common/Timer";
 import { TICKS_PER_FRAME } from "./globals";
-import { Character, CharacterBuilder } from "./game/Character";
+import { Character } from "./game/Character";
 import { Vec3D } from "./common/Vec3D";
+import { CharacterBuilder } from "./game/CharacterBuilder";
 
 let origin = new Vec2D();
 
