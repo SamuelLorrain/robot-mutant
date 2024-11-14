@@ -110,7 +110,13 @@ function drawMap(
           cursors.getSprite(tile.spriteNb).size
         )
       }
-      if (character.pos.eq(tile.position)) {
+      if (
+        character.pos.eq(tile.position) ||
+        (
+          character.target != null &&
+            character.target.eq(tile.position)
+        )
+      ) {
         const characterDrawPos = character.drawPos.add(origin);
         const characterTile = character.tile;
         const characterSprite = characterTile.spriteSheet.getSprite(characterTile.spriteNb);
