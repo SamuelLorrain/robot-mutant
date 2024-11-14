@@ -151,10 +151,29 @@ window.addEventListener('load', async () => {
   const c = (new CharacterBuilder())
     .setSpriteSheet(redSpriteSheet)
     .build();
+  let selectedTiles: Tile[] = [];
 
   c.pos = new Vec3D(1, 1, 1);
   const tileToMap = map.tile(c.pos);
   c.drawPos = tileToMap.drawPos;
+
+  // Tile selection routine
+  let cursorPositionOnMouseDown: Vec2D|null = null;
+  context2dProvider.canvas.addEventListener('mousedown', (e: MouseEvent) => {
+    cursorPositionOnMouseDown = new Vec2D(e.clientX, e.clientY);
+  });
+
+  context2dProvider.canvas.addEventListener('mouseup', (e: MouseEvent) => {
+    const cursorPositionOnMouseUp = new Vec2D(e.clientX, e.clientY);
+    if (cursorPositionOnMouseDown == null || !cursorPositionOnMouseDown.almostEq(cursorPositionOnMouseUp, 3)) {
+      return;
+    }
+    const tile = selectedTiles[0];
+    if (tile == null) {
+      return;
+    }
+    c.move(tile.position, map);
+  });
 
   const capTimer = new AutonomousTimer();
   capTimer.start();
@@ -178,7 +197,7 @@ window.addEventListener('load', async () => {
       panningListener.drag.y
     );
 
-    const selectedTiles = getSelectedTiles(origin, map, cursor.vec);
+    selectedTiles = getSelectedTiles(origin, map, cursor.vec);
     map.update(millisecondsDt);
     c.updateTimeline(millisecondsDt);
 
