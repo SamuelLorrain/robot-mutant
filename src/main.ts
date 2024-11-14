@@ -11,7 +11,7 @@ import { Tile } from "./game/Tile";
 import { SpriteSheet } from "./game/SpriteSheet";
 import { AutonomousTimer } from "./common/Timer";
 import { TICKS_PER_FRAME } from "./globals";
-import { Character } from "./game/Character";
+import { Character, CharacterBuilder } from "./game/Character";
 import { Vec3D } from "./common/Vec3D";
 
 let origin = new Vec2D();
@@ -75,7 +75,6 @@ function drawMap(
   selectedTiles: Tile[],
   cursors: SpriteSheet,
   character: Character,
-  characterSpriteSheet: SpriteSheet
 ) {
   for (let tileTower of map.tiles) {
     for (let tile of tileTower) {
@@ -84,6 +83,10 @@ function drawMap(
       }
       const pos = tile.position;
       const drawPos = tile.drawPos.add(origin);
+      const roundedDrawpos = new Vec2D(
+        Math.round(drawPos.x),
+        Math.round(drawPos.y)
+      )
       let isSelected = false;
       for(let selectedTile of selectedTiles) {
         if (selectedTile.position.eq(pos)) {
@@ -94,10 +97,7 @@ function drawMap(
         tile.spriteSheet.picture,
         tile.spriteSheet.getSprite(tile.spriteNb).position,
         tile.spriteSheet.getSprite(tile.spriteNb).size,
-        new Vec2D(
-          Math.round(drawPos.x),
-          Math.round(drawPos.y)
-        ),
+        roundedDrawpos,
         tile.spriteSheet.getSprite(tile.spriteNb).size
       )
       if (isSelected) {
@@ -105,24 +105,23 @@ function drawMap(
           cursors.picture,
           cursors.getSprite(2).position,
           cursors.getSprite(2).size,
-          new Vec2D(
-            Math.round(drawPos.x),
-            Math.round(drawPos.y)
-          ),
+          roundedDrawpos,
           cursors.getSprite(tile.spriteNb).size
         )
       }
       if (character.pos.eq(tile.position)) {
         const characterDrawPos = character.drawPos.add(origin);
+        const characterTile = character.tile;
+        const characterSprite = characterTile.spriteSheet.getSprite(characterTile.spriteNb);
         ctx.drawImage(
-          characterSpriteSheet.picture,
-          characterSpriteSheet.getSprite(1).position,
-          characterSpriteSheet.getSprite(1).size,
+          characterTile.spriteSheet.picture,
+          characterSprite.position,
+          characterSprite.size,
           new Vec2D(
             Math.round(characterDrawPos.x),
             Math.round(characterDrawPos.y)
           ),
-          characterSpriteSheet.getSprite(1).size
+          characterSprite.size,
         )
       }
     }
@@ -148,7 +147,10 @@ window.addEventListener('load', async () => {
   const map = await getMap();
   const cursors = await getCursors();
   const redSpriteSheet = await getRedCharacter();
-  const c = new Character()
+  const c = (new CharacterBuilder())
+    .setSpriteSheet(redSpriteSheet)
+    .build();
+
   c.pos = new Vec3D(1, 1, 1);
   const tileToMap = map.tile(c.pos);
   c.drawPos = tileToMap.drawPos;
@@ -177,6 +179,7 @@ window.addEventListener('load', async () => {
 
     const selectedTiles = getSelectedTiles(origin, map, cursor.vec);
     map.update(millisecondsDt);
+    c.updateTimeline(millisecondsDt);
 
     if (accumulatedDt >= TICKS_PER_FRAME) {
       // new draw if we are not capping fps
@@ -187,8 +190,7 @@ window.addEventListener('load', async () => {
         map,
         selectedTiles,
         cursors,
-        c,
-        redSpriteSheet
+        c
       );
       accumulatedDt = 0;
     }

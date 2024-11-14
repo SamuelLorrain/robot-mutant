@@ -15,3 +15,10 @@ export class SpriteException extends GameException {
     this.name = "SpriteException";
   }
 }
+
+export class CharacterException extends GameException {
+  constructor(msg: string) {
+    super(msg);
+    this.name = "CharacterException";
+  }
+}
