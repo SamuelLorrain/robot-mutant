@@ -40,11 +40,11 @@ not equal to mapSize (${this._mapSize.x*this._mapSize.y})`);
 
     for (let i = 0; i < mapSize.y; i++) {
       for (let j = 0; j < mapSize.x; j++) {
-        const tileLevels = tilesArray[mapSize.x*j+i];
+        const tileLevels = tilesArray[mapSize.x*i+j];
         tiles.push([]);
         for (let k = 0; k < tileLevels.length; k++) {
-          const tileInformations = tilesArray[mapSize.x*j+i][k];
-          const pos = new Vec3D(i,j,k);
+          const tileInformations = tilesArray[mapSize.x*i+j][k];
+          const pos = new Vec3D(j,i,k);
 
           if (typeof tileInformations == 'number') {
             tiles[tiles.length-1].push(new StaticTile(
