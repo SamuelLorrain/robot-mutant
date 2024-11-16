@@ -5,6 +5,8 @@ import { Vec3D } from "@/common/Vec3D";
 import { TILE_LEVEL_SIZE, TILE_SIZE } from "@/globals";
 import { Tile, StaticTile } from "@/game/Tile";
 import { AnimatedTile, AnimationTileTimelineFrame } from "@/game/AnimatedTile";
+import { Graph } from "@/common/Graph";
+import { Hash } from "@/common/Hash";
 
 export class WorldMapBuilder {
   private _spriteSheet: SpriteSheet|undefined = undefined;
@@ -104,7 +106,7 @@ export class WorldMap {
   }
 
   public tile(pos: Vec3D) {
-    return this.tiles[this.mapSize.y*pos.y+pos.x][pos.z]
+    return this.tiles[this.mapSize.y*pos.y+pos.x][pos.z];
   }
 
   public get mapSize() {
@@ -115,5 +117,38 @@ export class WorldMap {
     for (let tile of this._animatedTiles) {
       tile.updateTimeline(delta);
     }
+  }
+
+  public toGraph(): Graph {
+    const map = new Map<Hash, Hash[]>();
+
+    for (let i = 0; i < this._mapSize.y; i++) {
+      for (let j = 0; j <  this._mapSize.x; j++) {
+        const vec = new Vec2D(i, j);
+        const neighbours: Hash[] = [];
+        const n1 = new Vec2D(vec.x+1, vec.y);
+        const n2 = new Vec2D(vec.x-1, vec.y);
+        const n3 = new Vec2D(vec.x, vec.y+1);
+        const n4 = new Vec2D(vec.x, vec.y-1);
+
+        if (n1.x < this._mapSize.x) {
+          neighbours.push(n1.hash());
+        }
+        if (n2.x >= 0) {
+          neighbours.push(n2.hash());
+        }
+        if (n3.y < this._mapSize.y) {
+          neighbours.push(n3.hash());
+        }
+        if (n4.y >= 0) {
+          neighbours.push(n4.hash());
+        }
+
+        map.set(vec.hash(), neighbours);
+      }
+    }
+
+    const graph = new Graph(map);
+    return graph;
   }
 }
