@@ -1,3 +1,5 @@
+import { Hash } from "./Hash";
+
 export class Vec2D {
   public x: number;
   public y: number;
@@ -54,5 +56,14 @@ export class Vec2D {
 
   public almostEq(v: Vec2D, delta: number): boolean {
     return Math.abs(this.x - v.x) <= delta && Math.abs(this.y - v.y) <= delta;
+  }
+
+  public hash(): Hash {
+    return JSON.stringify([this.x, this.y]);
+  }
+
+  public static unhash(hash: Hash): Vec2D {
+    const jsonRepr = JSON.parse(hash);
+    return new Vec2D(jsonRepr[0], jsonRepr[1]);
   }
 }

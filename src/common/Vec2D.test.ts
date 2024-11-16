@@ -26,3 +26,12 @@ test('Should set Vec2D with Vec2D', () => {
   expect(vec.x).toBe(30);
   expect(vec.y).toBe(50);
 })
+
+test('Should create hash and unhash it', () => {
+  const vec = new Vec2D(10, 20);
+  const hashRepr = vec.hash();
+  expect(hashRepr).toEqual('[10,20]')
+  const vecCopy = Vec2D.unhash(hashRepr);
+  expect(vecCopy.x).toBe(10);
+  expect(vecCopy.y).toBe(20);
+})
