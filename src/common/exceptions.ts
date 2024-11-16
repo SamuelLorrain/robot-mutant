@@ -15,3 +15,10 @@ export class PriorityQueueException extends CommonException {
     this.name = "PriorityQueueException";
   }
 }
+
+export class GraphException extends CommonException {
+  constructor(msg: string) {
+    super(msg);
+    this.name = "GraphException";
+  }
+}
