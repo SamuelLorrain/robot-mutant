@@ -8,3 +8,10 @@ export class QueueException extends CommonException {
     this.name = "QueueException";
   }
 }
+
+export class PriorityQueueException extends CommonException {
+  constructor(msg: string) {
+    super(msg);
+    this.name = "PriorityQueueException";
+  }
+}
