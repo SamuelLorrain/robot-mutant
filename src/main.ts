@@ -154,14 +154,14 @@ window.addEventListener('load', async () => {
   const map = await getMap();
   const cursors = await getCursors();
   const redSpriteSheet = await getRedCharacter();
-  const c = (new CharacterBuilder())
+  const character = (new CharacterBuilder())
     .setSpriteSheet(redSpriteSheet)
     .build();
   let selectedTiles: Tile[] = [];
 
-  c.pos = new Vec3D(1, 1, 1);
-  const tileToMap = map.tile(c.pos);
-  c.drawPos = tileToMap.drawPos;
+  character.pos = new Vec3D(1, 1, 1);
+  const tileToMap = map.tile(character.pos);
+  character.drawPos = tileToMap.drawPos;
 
   // Tile selection routine
   let cursorPositionOnMouseDown: Vec2D|null = null;
@@ -178,7 +178,7 @@ window.addEventListener('load', async () => {
     if (tile == null) {
       return;
     }
-    c.move(tile.position, map);
+    character.move(tile.position, map);
   });
 
   const capTimer = new AutonomousTimer();
@@ -205,7 +205,7 @@ window.addEventListener('load', async () => {
 
     selectedTiles = getSelectedTiles(origin, map, cursor.vec);
     map.update(millisecondsDt);
-    c.updateTimeline(millisecondsDt);
+    character.updateTimeline(millisecondsDt);
 
     if (accumulatedDt >= TICKS_PER_FRAME) {
       // new draw if we are not capping fps
@@ -216,7 +216,7 @@ window.addEventListener('load', async () => {
         map,
         selectedTiles,
         cursors,
-        c
+        character
       );
       accumulatedDt = 0;
     }
