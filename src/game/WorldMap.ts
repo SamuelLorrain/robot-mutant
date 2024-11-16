@@ -106,7 +106,11 @@ export class WorldMap {
   }
 
   public tile(pos: Vec3D) {
-    return this.tiles[this.mapSize.y*pos.y+pos.x][pos.z];
+    return this.tiles[this._mapSize.x*pos.y+pos.x][pos.z];
+  }
+
+  public tileTower(pos: Vec2D) {
+    return this.tiles[this._mapSize.x*pos.y+pos.x];
   }
 
   public get mapSize() {
