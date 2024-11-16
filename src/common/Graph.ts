@@ -70,11 +70,11 @@ export class Graph {
     return this._reconstruct_path(came_from, start, goal);
   }
 
-  private _reconstruct_path(came_from: Map<Hash, Hash|undefined>, start: Hash, goal: Hash) {
+  private _reconstruct_path(came_from: Map<Hash, Hash|undefined>, start: Hash, goal: Hash): Hash[] {
     let current: Hash = goal;
     const path: Hash[] = [];
     if (!came_from.has(goal)) {
-      return undefined;
+      return [];
     }
     while (current != start) {
       path.push(current);
