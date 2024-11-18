@@ -66,4 +66,23 @@ export class Vec2D {
     const jsonRepr = JSON.parse(hash);
     return new Vec2D(jsonRepr[0], jsonRepr[1]);
   }
+
+  public map(f: (x: number) => number): Vec2D {
+    return new Vec2D(
+      f(this.x),
+      f(this.y)
+    );
+  }
+
+  public length(): number {
+    return Math.sqrt(this.x*this.x + this.y*this.y);
+  }
+
+  public normalize(): Vec2D {
+    const length = this.length();
+    return new Vec2D(
+      this.x / length,
+      this.y / length
+    );
+  }
 }
