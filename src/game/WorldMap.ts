@@ -113,6 +113,12 @@ export class WorldMap {
     return this.tiles[this._mapSize.x*pos.y+pos.x];
   }
 
+  public tileTopTower(pos: Vec2D) {
+    const tower = this.tiles[this._mapSize.x*pos.y+pos.x];
+    const towerLength = tower.length;
+    return tower[towerLength-1];
+  }
+
   public get mapSize() {
     return new Vec2D(this._mapSize);
   }
