@@ -104,12 +104,14 @@ export class Character {
       this._targetDrawPos == null)
       && this._targetPath.length == 0
     ) {
+      this.action = "idle";
       return;
     }
 
     if ((this._target == null ||
       this._targetDrawPos == null)
       && this._targetPath.length > 0) {
+      this.action = "walking";
       const currentStep = this._targetPath.shift();
       if (currentStep == undefined) {
         return;
@@ -123,7 +125,7 @@ export class Character {
     this._moveTowardsNextTarget(dt);
   }
 
-  private _moveTowardsNextTarget(db: DOMHighResTimeStamp) {
+  private _moveTowardsNextTarget(dt: DOMHighResTimeStamp) {
     if (this._target == null || this._targetDrawPos == null) {
       return;
     }
