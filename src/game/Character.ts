@@ -9,6 +9,11 @@ import { lerp } from "@/common/Math";
 export type Direction = "front" | "back" | "left" | "right";
 export type Action = "idle" | "begin-walk" | "walking" | "attack" | "take-damage";
 
+type PathStep = {
+  target: Vec3D
+  targetDrawPos: Vec2D
+};
+
 export class Character {
   private _pos: Vec3D;
   private _drawPos: Vec2D;
@@ -18,6 +23,7 @@ export class Character {
   private _currentTile: Tile;
   private _target?: Vec3D;
   private _targetDrawPos?: Vec2D;
+  private _targetPath: PathStep[];
 
   constructor(tiles: Map<string, Tile>) {
     this._pos = new Vec3D();
@@ -29,6 +35,7 @@ export class Character {
     this._currentTile = tile;
     this._target = undefined;
     this._targetDrawPos = undefined;
+    this._targetPath = [];
   }
 
   public set pos(pos: Vec3D) {
@@ -93,25 +100,49 @@ export class Character {
   }
 
   private _moveCharacterToTarget(dt: DOMHighResTimeStamp) {
-    if (this._target == null || this._targetDrawPos == null) {
+    if ((this._target == null ||
+      this._targetDrawPos == null)
+      && this._targetPath.length == 0
+    ) {
       return;
     }
-    if (this._drawPos.almostEq(this._targetDrawPos, 1)) {
-      this._pos = this._target;
-      this._drawPos = this._targetDrawPos;
-      this._target = undefined;
-      this._targetDrawPos = undefined;
+
+    if ((this._target == null ||
+      this._targetDrawPos == null)
+      && this._targetPath.length > 0) {
+      const currentStep = this._targetPath.shift();
+      if (currentStep == undefined) {
+        return;
+      }
+      this._target = new Vec3D(currentStep.target);
+      this._targetDrawPos = new Vec2D(currentStep.targetDrawPos);
+
+      this._changeCharacterPosition();
+    }
+
+    this._moveTowardsNextTarget(dt);
+  }
+
+  private _moveTowardsNextTarget(db: DOMHighResTimeStamp) {
+    if (this._target == null || this._targetDrawPos == null) {
       return;
     }
     const newX = lerp(this._drawPos.x, this._targetDrawPos.x, 0.1);
     const newY = lerp(this._drawPos.y, this._targetDrawPos.y, 0.1);
     this._drawPos = new Vec2D(newX, newY);
+
+    if (this._drawPos.almostEq(this._targetDrawPos, 1)) {
+      this._pos = this._target;
+      this._drawPos = this._targetDrawPos;
+      this._target = undefined;
+      this._targetDrawPos = undefined;
+    }
   }
 
-  public move(pos: Vec3D, map: WorldMap) {
-    this._target = map.tile(pos).position;
-    this._targetDrawPos = map.tile(pos).drawPos;
-
+  private _changeCharacterPosition() {
+    if (this._target == null) {
+      return;
+    }
     if (this._target.x > this._pos.x) {
       this.direction = "left";
     } else if (this._target.x < this._pos.x) {
@@ -121,5 +152,17 @@ export class Character {
     } else if (this._target.y < this._pos.y) {
       this.direction = "back";
     }
+  }
+
+  public startMove(path: Vec2D[], map: WorldMap) {
+    const consolidatedPath: PathStep[] = [];
+    path.forEach(p => {
+      const currentTile = map.tileTopTower(p);
+      consolidatedPath.push({
+        target: currentTile.position,
+        targetDrawPos: currentTile.drawPos
+      });
+    });
+    this._targetPath = consolidatedPath;
   }
 }

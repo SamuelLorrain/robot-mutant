@@ -152,6 +152,7 @@ window.addEventListener('load', async () => {
   cursor.scale = scaleProvider.scale;
 
   const map = await getMap();
+  const graph = map.toGraph();
   const cursors = await getCursors();
   const redSpriteSheet = await getRedCharacter();
   const character = (new CharacterBuilder())
@@ -178,7 +179,11 @@ window.addEventListener('load', async () => {
     if (tile == null) {
       return;
     }
-    character.move(tile.position, map);
+    const path = graph.djikstra(
+        new Vec2D(character.pos.x, character.pos.y).hash(),
+        new Vec2D(tile.position.x, tile.position.y).hash()
+      ).map(Vec2D.unhash);
+    character.startMove(path, map);
   });
 
   const capTimer = new AutonomousTimer();
