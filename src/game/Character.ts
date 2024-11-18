@@ -4,7 +4,6 @@ import { Tile } from "./Tile";
 import { Vec2D } from "@/common/Vec2D";
 import { CharacterException } from "./exceptions";
 import { AnimatedTile } from "./AnimatedTile";
-import { lerp } from "@/common/Math";
 
 export type Direction = "front" | "back" | "left" | "right";
 export type Action = "idle" | "begin-walk" | "walking" | "attack" | "take-damage";
@@ -13,6 +12,8 @@ type PathStep = {
   target: Vec3D
   targetDrawPos: Vec2D
 };
+
+const CHARACTER_SPEED = 40;
 
 export class Character {
   private _pos: Vec3D;
@@ -24,6 +25,7 @@ export class Character {
   private _target?: Vec3D;
   private _targetDrawPos?: Vec2D;
   private _targetPath: PathStep[];
+  private _velocity: Vec2D;
 
   constructor(tiles: Map<string, Tile>) {
     this._pos = new Vec3D();
@@ -36,6 +38,7 @@ export class Character {
     this._target = undefined;
     this._targetDrawPos = undefined;
     this._targetPath = [];
+    this._velocity = new Vec2D();
   }
 
   public set pos(pos: Vec3D) {
@@ -118,8 +121,12 @@ export class Character {
       }
       this._target = new Vec3D(currentStep.target);
       this._targetDrawPos = new Vec2D(currentStep.targetDrawPos);
-
-      this._changeCharacterPosition();
+      this._velocity = this._targetDrawPos
+        .sub(this._drawPos)
+        .normalize()
+        .mul(CHARACTER_SPEED)
+        .mul(1/dt);
+      this._changeCharacterDirection();
     }
 
     this._moveTowardsNextTarget(dt);
@@ -129,9 +136,8 @@ export class Character {
     if (this._target == null || this._targetDrawPos == null) {
       return;
     }
-    const newX = lerp(this._drawPos.x, this._targetDrawPos.x, 0.1);
-    const newY = lerp(this._drawPos.y, this._targetDrawPos.y, 0.1);
-    this._drawPos = new Vec2D(newX, newY);
+
+    this._drawPos = this._drawPos.add(this._velocity);
 
     if (this._drawPos.almostEq(this._targetDrawPos, 1)) {
       this._pos = this._target;
@@ -141,7 +147,7 @@ export class Character {
     }
   }
 
-  private _changeCharacterPosition() {
+  private _changeCharacterDirection() {
     if (this._target == null) {
       return;
     }
