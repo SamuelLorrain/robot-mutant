@@ -66,11 +66,17 @@ export class Character {
   }
 
   public set direction(direction: Direction) {
+    if (this._direction == direction) {
+      return;
+    }
     this._direction = direction;
     this._currentTile = this._retrieveCurrentTile();
   }
 
   public set action(action: Action) {
+    if (this._action == action) {
+      return;
+    }
     this._action = action;
     this._currentTile = this._retrieveCurrentTile();
   }
