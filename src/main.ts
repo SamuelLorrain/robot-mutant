@@ -16,64 +16,9 @@ import { Vec3D } from "./common/Vec3D";
 import { CharacterBuilder } from "./game/CharacterBuilder";
 import { GameStateProvider } from "./game/GameStateProvider";
 import { Hash } from "./common/Hash";
+import { Selector } from "./game/Selector";
 
 let origin = new Vec2D();
-
-function getSelectedTiles(origin: Vec2D, map: WorldMap, cursor: Vec2D): Tile[] {
-  const firstPassSelectedTiles: Tile[] = [];
-  for (let tileTower of map.tiles) {
-    for (let tile of tileTower) {
-      if (tile.spriteNb < 0) {
-        continue;
-      }
-      const drawPos = tile.drawPos.add(origin);
-
-      /*
-      * Optimisation.
-      * Only verify pixels on "almost certains" tiles.
-      * TODO verify if the optimisation worth.
-      */
-      if ((drawPos.x < cursor.x && (drawPos.x + tile.spriteSheet.size.x) >= cursor.x)
-          &&
-          (drawPos.y < cursor.y && (drawPos.y + tile.spriteSheet.size.y) >= cursor.y)) {
-        firstPassSelectedTiles.push(tile);
-      }
-    }
-  }
-
-  const secondPassSelectedTiles: Tile[] = [];
-  const mousePos = cursor.sub(origin);
-  mousePos.set(
-    Math.round(mousePos.x),
-    Math.round(mousePos.y),
-  )
-  for (let tile of firstPassSelectedTiles.reverse()) {
-    const spritePosition = tile.spriteSheet.getSprite(tile.spriteNb);
-    const spriteSheetImageData = tile.spriteSheet.picture.imageData;
-
-    const y = spritePosition.position.y;
-    const x = spritePosition.position.x;
-    const width = spriteSheetImageData.width;
-
-    const drawPos = tile.drawPos;
-    const selectedPixelPosOnATile = mousePos.sub(drawPos);
-    if ((selectedPixelPosOnATile.x >= spritePosition.size.x)
-      || (selectedPixelPosOnATile.y >= spritePosition.size.y)) {
-      continue;
-    }
-    const pixelRGBAPosition = (width*(y+selectedPixelPosOnATile.y)+(x+selectedPixelPosOnATile.x))*4;
-
-    if (spriteSheetImageData.data[pixelRGBAPosition+3] > 0) {
-      secondPassSelectedTiles.push(tile);
-      break;
-    }
-  }
-  const selectedTile = secondPassSelectedTiles[0];
-  if (selectedTile?.blocked) {
-    return [];
-  }
-  return secondPassSelectedTiles;
-}
 
 function drawMap(
   ctx: Context2DProvider,
@@ -163,6 +108,7 @@ window.addEventListener('load', async () => {
     scaleProvider
   );
   const gameStateProvider = new GameStateProvider();
+  const selector = new Selector(cursor);
 
   context2dProvider.canvas.style.scale = scaleProvider.scale.toString();
   panningListener.scale = scaleProvider.scale;
@@ -176,7 +122,6 @@ window.addEventListener('load', async () => {
     .setSpriteSheet(redSpriteSheet)
     .build();
   character.gameStateProvider = gameStateProvider;
-  let selectedTiles: Tile[] = [];
 
   character.pos = new Vec3D(1, 1, 1);
   const tileToMap = map.tile(character.pos);
@@ -196,7 +141,7 @@ window.addEventListener('load', async () => {
     if (gameStateProvider.gameState !== "Active") {
       return;
     }
-    const tile = selectedTiles[0];
+    const tile = selector.selectedTiles[0];
     if (tile == null || tile.blocked) {
       return;
     }
@@ -236,9 +181,9 @@ window.addEventListener('load', async () => {
 
     let path: Set<Hash> = new Set();
     if (gameStateProvider.gameState == "Active") {
-      selectedTiles = getSelectedTiles(origin, map, cursor.vec);
-      if (selectedTiles.length > 0) {
-        const tile = selectedTiles[0];
+      selector.updateSelectedTiles(origin, map);
+      if (selector.selectedTiles.length > 0) {
+        const tile = selector.selectedTiles[0];
         const pathList = graph.djikstra(
             new Vec2D(character.pos.x, character.pos.y).hash(),
             new Vec2D(tile.position.x, tile.position.y).hash()
@@ -262,7 +207,7 @@ window.addEventListener('load', async () => {
         context2dProvider,
         origin,
         map,
-        selectedTiles,
+        selector.selectedTiles,
         cursors,
         character,
         path
