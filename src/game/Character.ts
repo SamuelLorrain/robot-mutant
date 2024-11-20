@@ -191,4 +191,8 @@ export class Character {
     });
     this._targetPath = consolidatedPath;
   }
+
+  public get targetPath() {
+    return this._targetPath;
+  }
 }
