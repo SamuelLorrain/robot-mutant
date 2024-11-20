@@ -14,6 +14,7 @@ import { TICKS_PER_FRAME } from "./globals";
 import { Character } from "./game/Character";
 import { Vec3D } from "./common/Vec3D";
 import { CharacterBuilder } from "./game/CharacterBuilder";
+import { GameStateProvider } from "./game/GameStateProvider";
 
 let origin = new Vec2D();
 
@@ -146,6 +147,7 @@ window.addEventListener('load', async () => {
     panningListener,
     scaleProvider
   );
+  const gameStateProvider = new GameStateProvider();
 
   context2dProvider.canvas.style.scale = scaleProvider.scale.toString();
   panningListener.scale = scaleProvider.scale;
@@ -158,6 +160,7 @@ window.addEventListener('load', async () => {
   const character = (new CharacterBuilder())
     .setSpriteSheet(redSpriteSheet)
     .build();
+  character.gameStateProvider = gameStateProvider;
   let selectedTiles: Tile[] = [];
 
   character.pos = new Vec3D(1, 1, 1);
@@ -175,6 +178,10 @@ window.addEventListener('load', async () => {
     if (cursorPositionOnMouseDown == null || !cursorPositionOnMouseDown.almostEq(cursorPositionOnMouseUp, 3)) {
       return;
     }
+    if (gameStateProvider.gameState !== "Active") {
+      return;
+    }
+    gameStateProvider.gameState = "Waiting";
     const tile = selectedTiles[0];
     if (tile == null) {
       return;

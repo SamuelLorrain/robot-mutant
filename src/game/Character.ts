@@ -4,6 +4,7 @@ import { Tile } from "./Tile";
 import { Vec2D } from "@/common/Vec2D";
 import { CharacterException } from "./exceptions";
 import { AnimatedTile } from "./AnimatedTile";
+import { GameStateProvider } from "./GameStateProvider";
 
 export type Direction = "front" | "back" | "left" | "right";
 export type Action = "idle" | "begin-walk" | "walking" | "attack" | "take-damage";
@@ -26,8 +27,9 @@ export class Character {
   private _targetDrawPos?: Vec2D;
   private _targetPath: PathStep[];
   private _velocity: Vec2D;
+  private _gameStateProvider?: GameStateProvider;
 
-  constructor(tiles: Map<string, Tile>) {
+  constructor(tiles: Map<string, Tile>, gameStateProvider: GameStateProvider) {
     this._pos = new Vec3D();
     this._direction = "front";
     this._action = "idle";
@@ -39,6 +41,7 @@ export class Character {
     this._targetDrawPos = undefined;
     this._targetPath = [];
     this._velocity = new Vec2D();
+    this._gameStateProvider = gameStateProvider;
   }
 
   public set pos(pos: Vec3D) {
@@ -83,6 +86,10 @@ export class Character {
 
   public set target(target: Vec3D) {
     this._target = target;
+  }
+
+  public set gameStateProvider(gameStateProvider: GameStateProvider) {
+    this._gameStateProvider = gameStateProvider;
   }
 
   private _retrieveCurrentTile() {
@@ -150,6 +157,11 @@ export class Character {
       this._drawPos = this._targetDrawPos;
       this._target = undefined;
       this._targetDrawPos = undefined;
+      if (this._targetPath.length === 0) {
+        if (this._gameStateProvider != null) {
+          this._gameStateProvider.gameState = "Active";
+        }
+      }
     }
   }
 
