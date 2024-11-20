@@ -12,6 +12,11 @@ export type SpritePosition = {
    * Position of the current sprite in the spritesheet
    */
   position: Vec2D,
+
+  /**
+   * Indicate that an entity cannot cross the sprite
+   */
+  blocked: boolean;
 };
 
 export class SpriteSheet {
@@ -20,6 +25,7 @@ export class SpriteSheet {
   readonly sizeSpriteY: number;
   readonly nbSpritesColumn: number;
   readonly nbSpritesRow: number;
+  readonly blockedSprites: number[];
 
   constructor(
       picture: Picture,
@@ -27,12 +33,14 @@ export class SpriteSheet {
       sizeSpriteY: number,
       nbSpritesColumn: number,
       nbSpritesRow: number,
+      blockedSprites: number[] = []
   ) {
       this.picture = picture;
       this.sizeSpriteX = sizeSpriteX;
       this.sizeSpriteY = sizeSpriteY;
       this.nbSpritesColumn = nbSpritesColumn;
       this.nbSpritesRow = nbSpritesRow;
+      this.blockedSprites = blockedSprites;
   }
 
   /**
@@ -52,7 +60,8 @@ export class SpriteSheet {
       position: new Vec2D(
         x * this.sizeSpriteX,
         y * this.sizeSpriteY
-      )
+      ),
+      blocked: this.blockedSprites.includes(spriteNb)
     }
   }
 
@@ -66,6 +75,7 @@ export class SpriteSheetBuilder {
   private sizeSpriteX: number|null = null;
   private sizeSpriteY: number|null = null;
   private nbSpritesColumn: number|null = null;
+  private blockedSprites: number[] = [];
   private nbSpritesRow: number|null = null;
 
   public setPicture(picture: Picture): SpriteSheetBuilder {
@@ -93,6 +103,11 @@ export class SpriteSheetBuilder {
     return this
   }
 
+  public setBlockedSprites(blockedSprites: number[]) {
+    this.blockedSprites = blockedSprites;
+    return this;
+  }
+
   public build(): SpriteSheet {
     if(!this.canBuild()) {
       throw new SpriteException("Unable to build Sprite, bad value");
@@ -102,7 +117,8 @@ export class SpriteSheetBuilder {
       this.sizeSpriteX as number,
       this.sizeSpriteY as number,
       this.nbSpritesColumn as number,
-      this.nbSpritesRow as number
+      this.nbSpritesRow as number,
+      this.blockedSprites
     )
   }
 
