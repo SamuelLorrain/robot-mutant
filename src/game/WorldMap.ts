@@ -70,7 +70,11 @@ not equal to mapSize (${this._mapSize.x*this._mapSize.y})`);
       }
     }
 
-    return new WorldMap(tiles, mapSize, animatedTiles);
+    return new WorldMap(
+      tiles,
+      mapSize,
+      animatedTiles,
+    );
   }
 
   private _getDrawPos(pos: Vec3D) {
@@ -129,12 +133,28 @@ export class WorldMap {
     }
   }
 
+  private _isGraphNeighbour(vec: Vec2D): boolean {
+    const tile = this.tileTopTower(vec);
+    if (tile == null) {
+      return false;
+    }
+    if (tile.spriteNb === -1) {
+      return false;
+    }
+    if (tile.spriteSheet.getSprite(tile.spriteNb).blocked) {
+      return false;
+    }
+    return true;
+  }
+
   public toGraph(): Graph {
     const map = new Map<Hash, Hash[]>();
 
     for (let i = 0; i < this._mapSize.y; i++) {
       for (let j = 0; j <  this._mapSize.x; j++) {
         const vec = new Vec2D(i, j);
+
+
         const neighbours: Hash[] = [];
         const n1 = new Vec2D(vec.x+1, vec.y);
         const n2 = new Vec2D(vec.x-1, vec.y);
@@ -142,16 +162,24 @@ export class WorldMap {
         const n4 = new Vec2D(vec.x, vec.y-1);
 
         if (n1.x < this._mapSize.x) {
-          neighbours.push(n1.hash());
+          if (this._isGraphNeighbour(n1)) {
+            neighbours.push(n1.hash());
+          }
         }
         if (n2.x >= 0) {
-          neighbours.push(n2.hash());
+          if (this._isGraphNeighbour(n2)) {
+            neighbours.push(n2.hash());
+          }
         }
         if (n3.y < this._mapSize.y) {
-          neighbours.push(n3.hash());
+          if (this._isGraphNeighbour(n3)) {
+            neighbours.push(n3.hash());
+          }
         }
         if (n4.y >= 0) {
-          neighbours.push(n4.hash());
+          if (this._isGraphNeighbour(n4)) {
+            neighbours.push(n4.hash());
+          }
         }
 
         map.set(vec.hash(), neighbours);
