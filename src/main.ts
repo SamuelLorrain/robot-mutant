@@ -200,6 +200,9 @@ window.addEventListener('load', async () => {
     if (tile == null || tile.blocked) {
       return;
     }
+    if (tile.position.eq(character.pos)) {
+      return;
+    }
 
     gameStateProvider.gameState = "Waiting";
     const path = graph.djikstra(
