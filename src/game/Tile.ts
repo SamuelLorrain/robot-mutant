@@ -7,6 +7,7 @@ export interface Tile {
   get drawPos(): Vec2D;
   get spriteSheet(): SpriteSheet;
   get spriteNb(): number;
+  get blocked(): boolean;
 }
 
 export class StaticTile implements Tile {
@@ -41,5 +42,9 @@ export class StaticTile implements Tile {
 
   public get spriteNb() {
     return this._spriteNb;
+  }
+
+  public get blocked(): boolean {
+    return this._spriteSheet.getSprite(this._spriteNb).blocked;
   }
 }

@@ -79,4 +79,8 @@ export class AnimatedTile implements Tile {
   public set paused(pauseStatus: boolean) {
     this._paused = pauseStatus;
   }
+
+  public get blocked(): boolean {
+    return this._spriteSheet.getSprite(this.spriteNb).blocked;
+  }
 }
