@@ -15,6 +15,7 @@ import { Character } from "./game/Character";
 import { Vec3D } from "./common/Vec3D";
 import { CharacterBuilder } from "./game/CharacterBuilder";
 import { GameStateProvider } from "./game/GameStateProvider";
+import { Hash } from "./common/Hash";
 
 let origin = new Vec2D();
 
@@ -67,6 +68,10 @@ function getSelectedTiles(origin: Vec2D, map: WorldMap, cursor: Vec2D): Tile[] {
       break;
     }
   }
+  const selectedTile = secondPassSelectedTiles[0];
+  if (selectedTile?.blocked) {
+    return [];
+  }
   return secondPassSelectedTiles;
 }
 
@@ -77,6 +82,7 @@ function drawMap(
   selectedTiles: Tile[],
   cursors: SpriteSheet,
   character: Character,
+  path: Set<Hash>
 ) {
   for (let tileTower of map.tiles) {
     for (let tile of tileTower) {
@@ -107,6 +113,15 @@ function drawMap(
           cursors.picture,
           cursors.getSprite(2).position,
           cursors.getSprite(2).size,
+          roundedDrawpos,
+          cursors.getSprite(tile.spriteNb).size
+        )
+      }
+      if (path.has(new Vec2D(pos.x, pos.y).hash())) {
+        ctx.drawImage(
+          cursors.picture,
+          cursors.getSprite(4).position,
+          cursors.getSprite(4).size,
           roundedDrawpos,
           cursors.getSprite(tile.spriteNb).size
         )
@@ -216,7 +231,24 @@ window.addEventListener('load', async () => {
       panningListener.drag.y
     );
 
-    selectedTiles = getSelectedTiles(origin, map, cursor.vec);
+    let path: Set<Hash> = new Set();
+    if (gameStateProvider.gameState == "Active") {
+      selectedTiles = getSelectedTiles(origin, map, cursor.vec);
+      if (selectedTiles.length > 0) {
+        const tile = selectedTiles[0];
+        const pathList = graph.djikstra(
+            new Vec2D(character.pos.x, character.pos.y).hash(),
+            new Vec2D(tile.position.x, tile.position.y).hash()
+          );
+        for(let hash of pathList) {
+          path.add(hash);
+        }
+      }
+    } else {
+      for(let step of character.targetPath) {
+        path.add(new Vec2D(step.target.x, step.target.y).hash());
+      }
+    }
     map.update(millisecondsDt);
     character.updateTimeline(millisecondsDt);
 
@@ -229,7 +261,8 @@ window.addEventListener('load', async () => {
         map,
         selectedTiles,
         cursors,
-        character
+        character,
+        path
       );
       accumulatedDt = 0;
     }
