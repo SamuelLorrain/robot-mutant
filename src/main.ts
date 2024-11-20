@@ -181,11 +181,12 @@ window.addEventListener('load', async () => {
     if (gameStateProvider.gameState !== "Active") {
       return;
     }
-    gameStateProvider.gameState = "Waiting";
     const tile = selectedTiles[0];
-    if (tile == null) {
+    if (tile == null || tile.blocked) {
       return;
     }
+
+    gameStateProvider.gameState = "Waiting";
     const path = graph.djikstra(
         new Vec2D(character.pos.x, character.pos.y).hash(),
         new Vec2D(tile.position.x, tile.position.y).hash()
