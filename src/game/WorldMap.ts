@@ -97,16 +97,31 @@ export class WorldMap {
    */
   private _animatedTiles: AnimatedTile[];
 
+  /**
+  * Set of locked tiles in the map
+  */
+  private _lockedTilesPos2D: Set<Hash> = new Set();
+
   private _mapSize: Vec2D;
 
-  constructor(tiles: Tile[][], mapSize: Vec2D, animatedTiles: AnimatedTile[]) {
+
+  constructor(
+    tiles: Tile[][],
+    mapSize: Vec2D,
+    animatedTiles: AnimatedTile[]
+  ) {
     this._tiles = tiles;
     this._mapSize = mapSize;
     this._animatedTiles = animatedTiles;
+    this.computeLockedTilesPos2D();
   }
 
   public get tiles() {
     return this._tiles;
+  }
+
+  public get lockedTilesPos2D(): Set<Hash> {
+    return this._lockedTilesPos2D;
   }
 
   public tile(pos: Vec3D) {
@@ -154,7 +169,6 @@ export class WorldMap {
       for (let j = 0; j <  this._mapSize.x; j++) {
         const vec = new Vec2D(i, j);
 
-
         const neighbours: Hash[] = [];
         const n1 = new Vec2D(vec.x+1, vec.y);
         const n2 = new Vec2D(vec.x-1, vec.y);
@@ -188,5 +202,20 @@ export class WorldMap {
 
     const graph = new Graph(map);
     return graph;
+  }
+
+  public computeLockedTilesPos2D() {
+    for (let i = 0; i < this._mapSize.y; i++) {
+      for (let j = 0; j <  this._mapSize.x; j++) {
+        const vec = new Vec2D(i, j);
+        const tileTower = this.tileTower(vec);
+        for(const tile of tileTower) {
+          if (tile.blocked) {
+            this._lockedTilesPos2D.add(vec.hash());
+            continue;
+          }
+        }
+      }
+    }
   }
 }
