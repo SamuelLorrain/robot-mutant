@@ -178,6 +178,24 @@ window.addEventListener('load', async () => {
         3
       )
       reachableTilePos = floodFillResult;
+      reachableTilePos = reachableTilePos.difference(map.lockedTilesPos2D);
+      const toDelete = new Set<Hash>();
+      for(const vecHash of reachableTilePos) {
+        const vec = Vec2D.unhash(vecHash);
+        const north = vec.add(new Vec2D(0,-1)).hash();
+        const south = vec.add(new Vec2D(0,1)).hash();
+        const east = vec.add(new Vec2D(1,0)).hash();
+        const west = vec.add(new Vec2D(-1,0)).hash();
+        if (
+          !reachableTilePos.has(north) &&
+          !reachableTilePos.has(south) &&
+          !reachableTilePos.has(east) &&
+          !reachableTilePos.has(west)
+        ) {
+          toDelete.add(vecHash);
+        }
+      }
+      reachableTilePos = reachableTilePos.difference(toDelete);
       return;
     }
 
@@ -185,12 +203,15 @@ window.addEventListener('load', async () => {
       return;
     }
 
-    gameStateProvider.gameState = "Waiting";
     const path = graph.djikstra(
         new Vec2D(character.pos.x, character.pos.y).hash(),
         new Vec2D(tile.position.x, tile.position.y).hash()
-      ).map(Vec2D.unhash);
-    character.startMove(path, map);
+      )
+    if (new Set(path).difference(reachableTilePos).size > 0) {
+      return;
+    }
+    gameStateProvider.gameState = "Waiting";
+    character.startMove(path.map(Vec2D.unhash), map);
     reachableTilePos = new Set();
     gameStateProvider.selectedCharacter = undefined;
   });
@@ -228,8 +249,9 @@ window.addEventListener('load', async () => {
             new Vec2D(character.pos.x, character.pos.y).hash(),
             new Vec2D(tile.position.x, tile.position.y).hash()
           );
-          for(let hash of pathList) {
-            path.add(hash);
+          path = new Set(pathList);
+          if (path.difference(reachableTilePos).size > 0) {
+            path = new Set();
           }
         }
       }
