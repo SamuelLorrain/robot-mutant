@@ -2,6 +2,7 @@ import { GraphException } from "./exceptions";
 import { Hash } from "./Hash";
 import { PriorityQueueHash } from "./PriorityQueue";
 import { Queue } from "./Queue";
+import { Vec2D } from "./Vec2D";
 
 export class Graph {
   private _edges: Map<Hash, Hash[]> = new Map();
@@ -43,7 +44,7 @@ export class Graph {
     return came_from;
   }
 
-  public djikstra(start: Hash, goal: Hash) {
+  public djikstra(start: Hash, goal: Hash): Hash[] {
     const frontier = new PriorityQueueHash();
     frontier.enqueue(start, 0);
     const came_from = new Map<Hash, Hash|undefined>();
@@ -70,6 +71,30 @@ export class Graph {
     return this._reconstruct_path(came_from, start, goal);
   }
 
+  public floodFill(start: Hash, n: number): Set<Hash> {
+    const set: Set<Hash> = new Set();
+    const queue: Queue<Hash> = new Queue();
+    queue.enqueue(start);
+    const total = (((Math.pow(n, 2)+n)/2)*4)+1;
+    while (!queue.empty() && set.size < total) {
+      const current = queue.dequeue();
+      if (!set.has(current)) {
+        set.add(current);
+        const vec = Vec2D.unhash(current);
+        const north = vec.add(new Vec2D(0,-1));
+        const south = vec.add(new Vec2D(0,1));
+        const east = vec.add(new Vec2D(1,0));
+        const west = vec.add(new Vec2D(-1,0));
+        queue.enqueue(north.hash());
+        queue.enqueue(south.hash());
+        queue.enqueue(east.hash());
+        queue.enqueue(west.hash());
+      }
+      n--;
+    }
+    return set;
+  }
+
   private _reconstruct_path(came_from: Map<Hash, Hash|undefined>, start: Hash, goal: Hash): Hash[] {
     let current: Hash = goal;
     const path: Hash[] = [];
@@ -87,6 +112,5 @@ export class Graph {
     // path.push(start);
     return path.reverse();
   }
-
 }
 
