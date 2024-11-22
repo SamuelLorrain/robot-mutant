@@ -28,7 +28,8 @@ function drawMap(
   cursors: SpriteSheet,
   character: Character,
   path: Set<Hash>,
-  gameState: GameStateProvider
+  gameState: GameStateProvider,
+  reachableTiles: Set<Hash>
 ) {
   for (let tileTower of map.tiles) {
     for (let tile of tileTower) {
@@ -68,6 +69,15 @@ function drawMap(
           cursors.picture,
           cursors.getSprite(4).position,
           cursors.getSprite(4).size,
+          roundedDrawpos,
+          cursors.getSprite(tile.spriteNb).size
+        )
+      }
+      if (reachableTiles.has(new Vec2D(pos.x, pos.y).hash())) {
+        ctx.drawImage(
+          cursors.picture,
+          cursors.getSprite(6).position,
+          cursors.getSprite(6).size,
           roundedDrawpos,
           cursors.getSprite(tile.spriteNb).size
         )
@@ -146,6 +156,7 @@ window.addEventListener('load', async () => {
     cursorPositionOnMouseDown = new Vec2D(e.clientX, e.clientY);
   });
 
+  let reachableTilePos: Set<Hash> = new Set();
   context2dProvider.canvas.addEventListener('mouseup', (e: MouseEvent) => {
     const cursorPositionOnMouseUp = new Vec2D(e.clientX, e.clientY);
     if (cursorPositionOnMouseDown == null || !cursorPositionOnMouseDown.almostEq(cursorPositionOnMouseUp, 3)) {
@@ -155,11 +166,18 @@ window.addEventListener('load', async () => {
       return;
     }
     const tile = selector.selectedTiles[0];
-    if (tile == null || tile.blocked) {
+    if (tile == null || tile.blocked === true) {
+      gameStateProvider.selectedCharacter = undefined;
+      reachableTilePos = new Set();
       return;
     }
     if (tile.position.eq(character.pos)) {
       gameStateProvider.selectedCharacter = character;
+      const floodFillResult = graph.floodFill(
+        new Vec2D(character.pos.x, character.pos.y).hash(),
+        3
+      )
+      reachableTilePos = floodFillResult;
       return;
     }
 
@@ -173,6 +191,7 @@ window.addEventListener('load', async () => {
         new Vec2D(tile.position.x, tile.position.y).hash()
       ).map(Vec2D.unhash);
     character.startMove(path, map);
+    reachableTilePos = new Set();
     gameStateProvider.selectedCharacter = undefined;
   });
 
@@ -223,7 +242,6 @@ window.addEventListener('load', async () => {
     character.updateTimeline(millisecondsDt);
 
     if (accumulatedDt >= TICKS_PER_FRAME) {
-      // new draw if we are not capping fps
       context2dProvider.paintBackground();
       drawMap(
         context2dProvider,
@@ -233,7 +251,8 @@ window.addEventListener('load', async () => {
         cursors,
         character,
         path,
-        gameStateProvider
+        gameStateProvider,
+        reachableTilePos
       );
       accumulatedDt = 0;
     }
