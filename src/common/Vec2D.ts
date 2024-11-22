@@ -85,4 +85,8 @@ export class Vec2D {
       this.y / length
     );
   }
+
+  public distance(b: Vec2D): number {
+    return Math.sqrt(Math.pow(b.x - this.x, 2) + Math.pow(b.y - this.y, 2))
+  }
 }
