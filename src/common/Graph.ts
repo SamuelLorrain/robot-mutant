@@ -71,14 +71,23 @@ export class Graph {
     return this._reconstruct_path(came_from, start, goal);
   }
 
-  public floodFill(start: Hash, n: number): Set<Hash> {
+  public floodFill(start: Hash, n: number, lockedPos: Set<Hash> = new Set()): Set<Hash> {
     const set: Set<Hash> = new Set();
     const queue: Queue<Hash> = new Queue();
     queue.enqueue(start);
-    const total = (((Math.pow(n, 2)+n)/2)*4)+1;
+    let total = (((Math.pow(n, 2)+n)/2)*4)+1;
     while (!queue.empty() && set.size < total) {
       const current = queue.dequeue();
       if (!set.has(current)) {
+        if (lockedPos.has(current)) {
+          total -= 1;
+          continue;
+        }
+        const distance = Math.abs(Vec2D.unhash(current).distance(Vec2D.unhash(start)));
+        if (distance > n) {
+          total -= 1;
+          continue;
+        }
         set.add(current);
         const vec = Vec2D.unhash(current);
         const north = vec.add(new Vec2D(0,-1));
@@ -90,7 +99,6 @@ export class Graph {
         queue.enqueue(east.hash());
         queue.enqueue(west.hash());
       }
-      n--;
     }
     return set;
   }
