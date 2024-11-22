@@ -175,27 +175,10 @@ window.addEventListener('load', async () => {
       gameStateProvider.selectedCharacter = character;
       const floodFillResult = graph.floodFill(
         new Vec2D(character.pos.x, character.pos.y).hash(),
-        3
+        3,
+        map.lockedTilesPos2D
       )
       reachableTilePos = floodFillResult;
-      reachableTilePos = reachableTilePos.difference(map.lockedTilesPos2D);
-      const toDelete = new Set<Hash>();
-      for(const vecHash of reachableTilePos) {
-        const vec = Vec2D.unhash(vecHash);
-        const north = vec.add(new Vec2D(0,-1)).hash();
-        const south = vec.add(new Vec2D(0,1)).hash();
-        const east = vec.add(new Vec2D(1,0)).hash();
-        const west = vec.add(new Vec2D(-1,0)).hash();
-        if (
-          !reachableTilePos.has(north) &&
-          !reachableTilePos.has(south) &&
-          !reachableTilePos.has(east) &&
-          !reachableTilePos.has(west)
-        ) {
-          toDelete.add(vecHash);
-        }
-      }
-      reachableTilePos = reachableTilePos.difference(toDelete);
       return;
     }
 
