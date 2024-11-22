@@ -1,18 +1,15 @@
+import { Character } from "./Character";
+
 type GameState =  "Active" | "Waiting";
 
 
 export class GameStateProvider {
-  private _gameState: GameState;
+  public gameState: GameState;
+  public selectedCharacter?: Character;
 
   constructor() {
-    this._gameState = "Active";
+    this.gameState = "Active";
+    this.selectedCharacter = undefined;
   }
 
-  public set gameState(gameState: GameState) {
-    this._gameState = gameState;
-  }
-
-  public get gameState() {
-    return this._gameState;
-  }
 }
