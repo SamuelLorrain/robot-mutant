@@ -14,8 +14,8 @@ const grid = [
   [0, 0], [0], [0], [0], [0], [3], [0], [0], [0], [0],
   [0, 0], [0], [2], [0], [3], [3], [3], [0], [0], [0],
   [0, 0], [0], [0], [0], [0], [3], [3], [0], [0], [0],
-  [0, 0], [5], [-1], [-1], [8], [0], [0], [1], [0, 1], [0],
-  [0, 0], [0], [0], [0], [0], [0], [0], [-1], [-1], [0],
+  [0, 0], [5], [6], [6], [8], [0], [0], [1], [0, 1], [0],
+  [0, 0], [0], [0], [0], [0], [0], [0], [6], [6], [0],
   [0, 0], [0], [0], [0], [0], [0], [0], [0], [0], [0],
   [0, 0],
   [[{durationMs: 500, spriteNb: 9}, {durationMs: 500, spriteNb: 10}]],
@@ -31,7 +31,7 @@ const getMap = async (): Promise<WorldMap> => {
     .setSizeSpriteY(64)
     .setNbSpritesRow(4)
     .setNbSpritesColumn(4)
-    .setBlockedSprites([2,3,4,9,10])
+    .setBlockedSprites([2,3,4,9,10,6])
     .build()
   const worldMap = (new WorldMapBuilder())
     .setSpriteSheet(spriteSheet)
