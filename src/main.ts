@@ -10,7 +10,7 @@ import { WorldMap } from "./game/WorldMap";
 import { Tile } from "./game/Tile";
 import { SpriteSheet } from "./game/SpriteSheet";
 import { AutonomousTimer } from "./common/Timer";
-import { TICKS_PER_FRAME } from "./globals";
+import { TICKS_PER_FRAME, TILE_LEVEL_SIZE } from "./globals";
 import { Character } from "./game/Character";
 import { Vec3D } from "./common/Vec3D";
 import { CharacterBuilder } from "./game/CharacterBuilder";
@@ -27,7 +27,8 @@ function drawMap(
   selectedTiles: Tile[],
   cursors: SpriteSheet,
   character: Character,
-  path: Set<Hash>
+  path: Set<Hash>,
+  gameState: GameStateProvider
 ) {
   for (let tileTower of map.tiles) {
     for (let tile of tileTower) {
@@ -91,6 +92,18 @@ function drawMap(
           ),
           characterSprite.size,
         )
+        if (gameState.selectedCharacter === character && gameState.gameState === "Active") {
+        ctx.drawImage(
+          cursors.picture,
+          cursors.getSprite(8).position,
+          cursors.getSprite(8).size,
+          new Vec2D(
+            Math.round(characterDrawPos.x),
+            Math.round(characterDrawPos.y) - (3*TILE_LEVEL_SIZE)
+          ),
+          cursors.getSprite(tile.spriteNb).size
+        )
+        }
       }
     }
   }
@@ -146,6 +159,11 @@ window.addEventListener('load', async () => {
       return;
     }
     if (tile.position.eq(character.pos)) {
+      gameStateProvider.selectedCharacter = character;
+      return;
+    }
+
+    if (gameStateProvider.selectedCharacter == null) {
       return;
     }
 
@@ -155,6 +173,7 @@ window.addEventListener('load', async () => {
         new Vec2D(tile.position.x, tile.position.y).hash()
       ).map(Vec2D.unhash);
     character.startMove(path, map);
+    gameStateProvider.selectedCharacter = undefined;
   });
 
   const capTimer = new AutonomousTimer();
@@ -182,14 +201,17 @@ window.addEventListener('load', async () => {
     let path: Set<Hash> = new Set();
     if (gameStateProvider.gameState == "Active") {
       selector.updateSelectedTiles(origin, map);
-      if (selector.selectedTiles.length > 0) {
-        const tile = selector.selectedTiles[0];
-        const pathList = graph.djikstra(
+
+      if (gameStateProvider.selectedCharacter != null) {
+        if (selector.selectedTiles.length > 0) {
+          const tile = selector.selectedTiles[0];
+          const pathList = graph.djikstra(
             new Vec2D(character.pos.x, character.pos.y).hash(),
             new Vec2D(tile.position.x, tile.position.y).hash()
           );
-        for(let hash of pathList) {
-          path.add(hash);
+          for(let hash of pathList) {
+            path.add(hash);
+          }
         }
       }
     } else {
@@ -210,7 +232,8 @@ window.addEventListener('load', async () => {
         selector.selectedTiles,
         cursors,
         character,
-        path
+        path,
+        gameStateProvider
       );
       accumulatedDt = 0;
     }
