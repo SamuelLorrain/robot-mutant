@@ -43,7 +43,6 @@ window.addEventListener('load', async () => {
     .setSpriteSheet(redSpriteSheet)
     .build();
   character.gameStateProvider = gameStateProvider;
-
   character.pos = new Vec3D(1, 1, 1);
   const tileToMap = map.tile(character.pos);
   character.drawPos = tileToMap.drawPos;
@@ -63,7 +62,7 @@ window.addEventListener('load', async () => {
     if (gameStateProvider.gameState !== "Active") {
       return;
     }
-    const tile = selector.selectedTiles[0];
+    const tile = selector.hoverTile;
     if (tile == null || tile.blocked === true) {
       gameStateProvider.selectedCharacter = undefined;
       reachableTilePos = new Set();
@@ -121,11 +120,11 @@ window.addEventListener('load', async () => {
 
     let path: Set<Hash> = new Set();
     if (gameStateProvider.gameState == "Active") {
-      selector.updateSelectedTiles(origin, map);
+      selector.updateHoverTile(origin, map);
 
       if (gameStateProvider.selectedCharacter != null) {
-        if (selector.selectedTiles.length > 0) {
-          const tile = selector.selectedTiles[0];
+        if (selector.hoverTile != undefined) {
+          const tile = selector.hoverTile;
           const pathList = graph.djikstra(
             new Vec2D(character.pos.x, character.pos.y).hash(),
             new Vec2D(tile.position.x, tile.position.y).hash()
@@ -150,7 +149,7 @@ window.addEventListener('load', async () => {
         context2dProvider,
         origin,
         map,
-        selector.selectedTiles,
+        selector.hoverTile,
         cursors,
         character,
         path,

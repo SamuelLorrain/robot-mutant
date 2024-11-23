@@ -5,20 +5,20 @@ import { Tile } from "./Tile";
 
 export class Selector {
   private _mouse: Mouse;
-  private _selectedTiles: Tile[];
+  private _hoverTile?: Tile;
 
   constructor (mouse: Mouse) {
     this._mouse = mouse;
-    this._selectedTiles = [];
+    this._hoverTile = undefined;
   }
 
-  public get selectedTiles() {
-    return this._selectedTiles;
+  public get hoverTile() {
+    return this._hoverTile;
   }
 
-  updateSelectedTiles(origin: Vec2D, map: WorldMap) {
+  updateHoverTile(origin: Vec2D, map: WorldMap) {
     const cursor = this._mouse.vec;
-    const firstPassSelectedTiles: Tile[] = [];
+    const firstPassHoverTiles: Tile[] = [];
     for (let tileTower of map.tiles) {
       for (let tile of tileTower) {
         if (tile.spriteNb < 0) {
@@ -34,18 +34,18 @@ export class Selector {
         if ((drawPos.x < cursor.x && (drawPos.x + tile.spriteSheet.size.x) >= cursor.x)
             &&
             (drawPos.y < cursor.y && (drawPos.y + tile.spriteSheet.size.y) >= cursor.y)) {
-          firstPassSelectedTiles.push(tile);
+          firstPassHoverTiles.push(tile);
         }
       }
     }
 
-    const secondPassSelectedTiles: Tile[] = [];
+    const secondPassHoverTiles: Tile[] = [];
     const mousePos = cursor.sub(origin);
     mousePos.set(
       Math.round(mousePos.x),
       Math.round(mousePos.y),
     )
-    for (let tile of firstPassSelectedTiles.reverse()) {
+    for (let tile of firstPassHoverTiles.reverse()) {
       const spritePosition = tile.spriteSheet.getSprite(tile.spriteNb);
       const spriteSheetImageData = tile.spriteSheet.picture.imageData;
 
@@ -54,23 +54,22 @@ export class Selector {
       const width = spriteSheetImageData.width;
 
       const drawPos = tile.drawPos;
-      const selectedPixelPosOnATile = mousePos.sub(drawPos);
-      if ((selectedPixelPosOnATile.x >= spritePosition.size.x)
-        || (selectedPixelPosOnATile.y >= spritePosition.size.y)) {
+      const hoverPixelPosOnATile = mousePos.sub(drawPos);
+      if ((hoverPixelPosOnATile.x >= spritePosition.size.x)
+        || (hoverPixelPosOnATile.y >= spritePosition.size.y)) {
         continue;
       }
-      const pixelRGBAPosition = (width*(y+selectedPixelPosOnATile.y)+(x+selectedPixelPosOnATile.x))*4;
+      const pixelRGBAPosition = (width*(y+hoverPixelPosOnATile.y)+(x+hoverPixelPosOnATile.x))*4;
 
       if (spriteSheetImageData.data[pixelRGBAPosition+3] > 0) {
-        secondPassSelectedTiles.push(tile);
+        secondPassHoverTiles.push(tile);
         break;
       }
     }
-    const selectedTile = secondPassSelectedTiles[0];
-    if (selectedTile?.blocked) {
-      return this._selectedTiles = [];
+    const hoverTile = secondPassHoverTiles[0];
+    if (hoverTile?.blocked) {
+      return this._hoverTile = undefined;
     }
-    this._selectedTiles = secondPassSelectedTiles;
+    this._hoverTile = secondPassHoverTiles[0];
   }
-
 }

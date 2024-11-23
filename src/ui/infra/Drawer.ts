@@ -12,7 +12,7 @@ export function drawMap(
   ctx: Context2DProvider,
   origin: Vec2D,
   map: WorldMap,
-  selectedTiles: Tile[],
+  hoverTile: Tile|undefined,
   cursors: SpriteSheet,
   character: Character,
   path: Set<Hash>,
@@ -30,11 +30,9 @@ export function drawMap(
         Math.round(drawPos.x),
         Math.round(drawPos.y)
       )
-      let isSelected = false;
-      for(let selectedTile of selectedTiles) {
-        if (selectedTile.position.eq(pos)) {
-          isSelected = true;
-        }
+      let isHoverTile = false;
+      if (hoverTile != null && hoverTile.position.eq(pos)) {
+          isHoverTile = true;
       }
       ctx.drawImage(
         tile.spriteSheet.picture,
@@ -43,7 +41,7 @@ export function drawMap(
         roundedDrawpos,
         tile.spriteSheet.getSprite(tile.spriteNb).size
       )
-      if (isSelected) {
+      if (isHoverTile) {
         ctx.drawImage(
           cursors.picture,
           cursors.getSprite(2).position,
