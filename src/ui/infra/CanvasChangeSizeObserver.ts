@@ -1,31 +1,53 @@
-import { Vec2D } from "@/common/Vec2D";
-import Mouse from "./Mouse";
-import CanvasPanningListener from "./CanvasPanningListener";
 import ScaleProvider from "../domain/ScaleProvider";
+import { Publisher } from "@/common/behavioral/Publisher";
+import { Observer } from "@/common/behavioral/Observer";
+import { PublisherEventType } from "@/common/behavioral/PublisherEvent";
 
-export default class CanvasChangeSizeObserver {
+export default class CanvasChangeSizeObserver implements Publisher {
   private readonly _resize_observer: ResizeObserver;
   private _width: number = 0;
   private _height: number = 0;
   private readonly _canvas: HTMLCanvasElement;
-  private readonly _mouse: Mouse;
-  private readonly _panningListener: CanvasPanningListener;
   private readonly _scaleProvider: ScaleProvider;
-
+  private readonly _changeSizeObservers: Observer[];
 
   constructor(
     canvas: HTMLCanvasElement,
-    mouse: Mouse,
-    panningListener: CanvasPanningListener,
     scaleProvider: ScaleProvider
   ) {
     this._resize_observer = new ResizeObserver(this.onResize);
     this._resize_observer.observe(canvas, {box: 'content-box'});
-    this._mouse = mouse;
-    this._panningListener = panningListener;
     this._canvas = canvas;
     this._scaleProvider = scaleProvider;
+    this._changeSizeObservers = [];
     this.createWheelEventListener()
+  }
+
+  public addObserver(observer: Observer) {
+    this._changeSizeObservers.push(observer)
+  }
+
+  public notifyResize() {
+    const event = {
+      data: {
+        width: this._width,
+        height: this._height
+      },
+      eventType: "ResizeEvent" as PublisherEventType
+    }
+    for(const observer of this._changeSizeObservers) {
+      observer.update(event);
+    }
+  }
+
+  public notifyScaleChange() {
+    const event = {
+      data: this._scaleProvider.scale,
+      eventType: "ScaleEvent" as PublisherEventType
+    }
+    for(const observer of this._changeSizeObservers) {
+      observer.update(event);
+    }
   }
 
   /* From : https://webglfundamentals.org/webgl/lessons/webgl-resizing-the-canvas.html */
@@ -52,14 +74,8 @@ export default class CanvasChangeSizeObserver {
       }
       this._width = Math.round(width * dpr);
       this._height = Math.round(height * dpr);
-      if (this._mouse) {
-        this._mouse.canvasSize = new Vec2D(
-          this._width,
-          this._height
-        );
-      }
     }
-    this._panningListener.drag = new Vec2D(this._width/2, this._height/2);
+    this.notifyResize();
   }
 
   private createWheelEventListener() {
@@ -73,6 +89,7 @@ export default class CanvasChangeSizeObserver {
 
       const direction = e.deltaY < 0 ? 1 : -1;
       const newScale = this._scaleProvider.scale + direction;
+
       if (newScale < 1) {
         this._scaleProvider.scale = 1
       } else if (newScale > 6) {
@@ -81,9 +98,7 @@ export default class CanvasChangeSizeObserver {
         this._scaleProvider.scale = newScale;
       }
 
-      this._canvas.style.scale = this._scaleProvider.scale.toString();
-      this._panningListener.scale = this._scaleProvider.scale;
-      this._mouse.scale = this._scaleProvider.scale;
+      this.notifyScaleChange();
     }, { passive: false});
   }
 

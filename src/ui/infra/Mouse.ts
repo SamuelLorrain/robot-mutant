@@ -1,3 +1,5 @@
+import { Observer } from "@/common/behavioral/Observer";
+import { PublisherEvent } from "@/common/behavioral/PublisherEvent";
 import { safeDiv } from "@/common/Math";
 import { Vec2D } from "@/common/Vec2D";
 
@@ -10,7 +12,7 @@ const scaleFactor: number[] = [
   2.4
 ];
 
-export default class Mouse {
+export default class Mouse implements Observer {
   private _mouseVec: Vec2D;
   private static _instance: Mouse;
   private _scale: number;
@@ -49,5 +51,16 @@ export default class Mouse {
 
   public set canvasSize(v: Vec2D) {
     this._canvasSize.set(v);
+  }
+
+  public update(event: PublisherEvent) {
+    if (event.eventType === "ScaleEvent") {
+      this._scale = event.data;
+    } else if (event.eventType === "ResizeEvent") {
+      this._canvasSize = new Vec2D(
+        event.data.width,
+        event.data.height,
+      )
+    }
   }
 }

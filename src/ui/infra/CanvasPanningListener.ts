@@ -1,6 +1,8 @@
+import { Observer } from "@/common/behavioral/Observer";
+import { PublisherEvent } from "@/common/behavioral/PublisherEvent";
 import { Vec2D } from "@/common/Vec2D";
 
-export default class CanvasPanningListener {
+export default class CanvasPanningListener implements Observer {
   readonly _canvas: HTMLCanvasElement;
   private _dragging: boolean;
   private _drag: Vec2D;
@@ -66,5 +68,14 @@ export default class CanvasPanningListener {
 
   public set drag(vec: Vec2D) {
     this._drag = new Vec2D(vec);
+  }
+
+  public update(event: PublisherEvent) {
+    if (event.eventType === "ScaleEvent") {
+      this._scale = event.data;
+    }
+    else if (event.eventType === "ResizeEvent") {
+      this._drag = new Vec2D(event.data.width/2, event.data.height/2);
+    }
   }
 }

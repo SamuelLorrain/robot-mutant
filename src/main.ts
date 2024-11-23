@@ -24,13 +24,14 @@ window.addEventListener('load', async () => {
   const panningListener = new CanvasPanningListener(context2dProvider.canvas, new Vec2D(1500, 700));
   const changeSizeObserver = new CanvasChangeSizeObserver(
     context2dProvider.canvas,
-    cursor,
-    panningListener,
     scaleProvider
   );
-  context2dProvider.canvas.style.scale = scaleProvider.scale.toString();
-  panningListener.scale = scaleProvider.scale;
-  cursor.scale = scaleProvider.scale;
+  changeSizeObserver.addObserver(context2dProvider);
+  changeSizeObserver.addObserver(cursor);
+  changeSizeObserver.addObserver(panningListener);
+
+  changeSizeObserver.notifyScaleChange();
+  changeSizeObserver.notifyResize();
 
   const gameStateProvider = new GameStateProvider();
 
@@ -103,10 +104,6 @@ window.addEventListener('load', async () => {
     lastTime = now;
     accumulatedDt += millisecondsDt;
 
-    context2dProvider.updateCanvasSize(
-      changeSizeObserver.width,
-      changeSizeObserver.height
-    );
     origin.set(
       panningListener.drag.x,
       panningListener.drag.y
