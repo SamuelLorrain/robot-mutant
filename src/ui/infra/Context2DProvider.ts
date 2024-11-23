@@ -2,9 +2,11 @@ import { Context2DException } from "@/ui/exceptions";
 import conf from '@/configuration';
 import { Vec2D } from "@/common/Vec2D";
 import Picture from "./Picture";
+import { Observer } from "@/common/behavioral/Observer";
+import { PublisherEvent } from "@/common/behavioral/PublisherEvent";
 
 /* Service class used to get the 2D context of the webpage */
-export default class Context2DProvider {
+export default class Context2DProvider implements Observer {
   private readonly _ctx: CanvasRenderingContext2D;
   private readonly _canvas: HTMLCanvasElement;
 
@@ -53,6 +55,17 @@ export default class Context2DProvider {
   public paintBackground() {
     this._ctx.fillStyle = conf.canvas.background;
     this._ctx.fillRect(0,0, this.canvas.width, this.canvas.height);
+  }
+
+  public update(event: PublisherEvent) {
+    if (event.eventType === "ScaleEvent") {
+      this._canvas.style.scale = event.data.toString();
+    } else if (event.eventType === "ResizeEvent") {
+      this.updateCanvasSize(
+        event.data.width,
+        event.data.height
+      )
+    }
   }
 
   /**
