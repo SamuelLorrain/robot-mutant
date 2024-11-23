@@ -1,4 +1,4 @@
-export type PublisherEventType = "TimerEvent";
+export type PublisherEventType = "TimerEvent" | "ResizeEvent" | "ScaleEvent";
 
 export type PublisherEvent = {
   data: any,
