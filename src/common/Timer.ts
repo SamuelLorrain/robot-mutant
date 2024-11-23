@@ -1,19 +1,28 @@
+import { Observer } from "./behavioral/Observer";
+import { Publisher } from "./behavioral/Publisher";
+
 /**
  * A Timer implementation
  * that rely on `performance.now()` to get
  * the time.
  */
-export class AutonomousTimer {
+export class AutonomousTimer implements Publisher {
   private _startTicks: number;
   private _pausedTicks: number;
   private _isPaused: boolean;
   private _isStarted: boolean;
+  private _observers: Observer[];
+  private _deltaLastGetTicks = 0;
+  private _lastGetTicks = 0;
 
   constructor() {
     this._startTicks = 0;
     this._pausedTicks = 0;
     this._isPaused = false;
     this._isStarted = false;
+    this._observers =  [];
+    this._deltaLastGetTicks = 0;
+    this._lastGetTicks = 0;
   }
 
   public start(startTime: DOMHighResTimeStamp|null = null) {
@@ -32,6 +41,8 @@ export class AutonomousTimer {
     this._isPaused = false;
     this._startTicks = 0;
     this._pausedTicks = 0;
+    this._deltaLastTime = 0;
+    this._lastGetTicks = 0;
   }
 
   public pause() {
@@ -59,7 +70,13 @@ export class AutonomousTimer {
         currentTime = performance.now() - this._pausedTicks;
       }
     }
+    this._deltaLastGetTicks =  currentTime - this._lastGetTicks;
+    this._lastGetTicks = currentTime;
     return currentTime;
+  }
+
+  public getDeltaLastGetTicks()  {
+    return this._deltaLastGetTicks
   }
 
   public get isPaused(): boolean {
@@ -68,6 +85,19 @@ export class AutonomousTimer {
 
   public get isStarted(): boolean {
     return this._isStarted;
+  }
+
+  addObserver(observer: Observer) {
+    this._observers.push(observer);
+  }
+
+  public notify() {
+    for(const observer of this._observers) {
+      observer.update({
+        data: this._deltaLastGetTicks,
+        eventType: "TimerEvent"
+      })
+    }
   }
 }
 
