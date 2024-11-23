@@ -2,14 +2,41 @@ import { Vec2D } from "@/common/Vec2D";
 import Mouse from "@/ui/infra/Mouse";
 import { WorldMap } from "./WorldMap";
 import { Tile } from "./Tile";
+import Context2DProvider from "@/ui/infra/Context2DProvider";
 
 export class Selector {
   private _mouse: Mouse;
   private _hoverTile?: Tile;
+  private _cursorPositionOnMouseDown?: Vec2D;
+  private _context2dProvider: Context2DProvider;
 
-  constructor (mouse: Mouse) {
+  constructor (
+    mouse: Mouse,
+    context2DProvider: Context2DProvider,
+    onClick: (e: MouseEvent) => void
+  ) {
     this._mouse = mouse;
     this._hoverTile = undefined;
+    this._cursorPositionOnMouseDown = undefined;
+    this._context2dProvider = context2DProvider;
+    this._initMouseDown();
+    this._initMouseUp(onClick);
+  }
+
+  private _initMouseDown() {
+    this._context2dProvider.canvas.addEventListener('mousedown', (e: MouseEvent) => {
+      this._cursorPositionOnMouseDown = new Vec2D(e.clientX, e.clientY);
+    });
+  }
+
+  private _initMouseUp(f: (e: MouseEvent) => void) {
+    this._context2dProvider.canvas.addEventListener('mousedown', (e: MouseEvent) => {
+      const cursorPositionOnMouseUp = new Vec2D(e.clientX, e.clientY);
+      if (this._cursorPositionOnMouseDown == null || !this._cursorPositionOnMouseDown.almostEq(cursorPositionOnMouseUp, 3)) {
+        return;
+      }
+      f(e);
+    });
   }
 
   public get hoverTile() {
@@ -72,4 +99,5 @@ export class Selector {
     }
     this._hoverTile = secondPassHoverTiles[0];
   }
+
 }

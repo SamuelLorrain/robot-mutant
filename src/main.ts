@@ -29,7 +29,6 @@ window.addEventListener('load', async () => {
     scaleProvider
   );
   const gameStateProvider = new GameStateProvider();
-  const selector = new Selector(cursor);
 
   context2dProvider.canvas.style.scale = scaleProvider.scale.toString();
   panningListener.scale = scaleProvider.scale;
@@ -47,18 +46,9 @@ window.addEventListener('load', async () => {
   const tileToMap = map.tile(character.pos);
   character.drawPos = tileToMap.drawPos;
 
-  // Tile selection routine
-  let cursorPositionOnMouseDown: Vec2D|null = null;
-  context2dProvider.canvas.addEventListener('mousedown', (e: MouseEvent) => {
-    cursorPositionOnMouseDown = new Vec2D(e.clientX, e.clientY);
-  });
-
   let reachableTilePos: Set<Hash> = new Set();
-  context2dProvider.canvas.addEventListener('mouseup', (e: MouseEvent) => {
-    const cursorPositionOnMouseUp = new Vec2D(e.clientX, e.clientY);
-    if (cursorPositionOnMouseDown == null || !cursorPositionOnMouseDown.almostEq(cursorPositionOnMouseUp, 3)) {
-      return;
-    }
+
+  const onClick = (_: MouseEvent) => {
     if (gameStateProvider.gameState !== "Active") {
       return;
     }
@@ -94,7 +84,9 @@ window.addEventListener('load', async () => {
     character.startMove(path.map(Vec2D.unhash), map);
     reachableTilePos = new Set();
     gameStateProvider.selectedCharacter = undefined;
-  });
+  }
+
+  const selector = new Selector(cursor, context2dProvider, onClick);
 
   const capTimer = new AutonomousTimer();
   capTimer.start();
