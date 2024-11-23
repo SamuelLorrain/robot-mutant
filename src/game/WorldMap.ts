@@ -7,6 +7,7 @@ import { Tile, StaticTile } from "@/game/Tile";
 import { AnimatedTile, AnimationTileTimelineFrame } from "@/game/AnimatedTile";
 import { Graph } from "@/common/Graph";
 import { Hash } from "@/common/Hash";
+import { PublisherEvent } from "@/common/behavioral/PublisherEvent";
 
 export class WorldMapBuilder {
   private _spriteSheet: SpriteSheet|undefined = undefined;
@@ -142,9 +143,12 @@ export class WorldMap {
     return new Vec2D(this._mapSize);
   }
 
-  public update(delta: DOMHighResTimeStamp) {
+  public update(event: PublisherEvent) {
+    if (event.eventType !== "TimerEvent") {
+      return;
+    }
     for (let tile of this._animatedTiles) {
-      tile.updateTimeline(delta);
+      tile.updateTimeline(event.data as DOMHighResTimeStamp);
     }
   }
 

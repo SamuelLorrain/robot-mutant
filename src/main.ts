@@ -28,11 +28,11 @@ window.addEventListener('load', async () => {
     panningListener,
     scaleProvider
   );
-  const gameStateProvider = new GameStateProvider();
-
   context2dProvider.canvas.style.scale = scaleProvider.scale.toString();
   panningListener.scale = scaleProvider.scale;
   cursor.scale = scaleProvider.scale;
+
+  const gameStateProvider = new GameStateProvider();
 
   const map = await getMap();
   const graph = map.toGraph();
@@ -64,7 +64,7 @@ window.addEventListener('load', async () => {
         new Vec2D(character.pos.x, character.pos.y).hash(),
         3,
         map.lockedTilesPos2D
-      )
+    )
       reachableTilePos = floodFillResult;
       return;
     }
@@ -90,6 +90,8 @@ window.addEventListener('load', async () => {
 
   const capTimer = new AutonomousTimer();
   capTimer.start();
+  capTimer.addObserver(character);
+  capTimer.addObserver(map);
 
   let lastTime = 0;
   let countedFrames = 0;
@@ -132,8 +134,7 @@ window.addEventListener('load', async () => {
         path.add(new Vec2D(step.target.x, step.target.y).hash());
       }
     }
-    map.update(millisecondsDt);
-    character.updateTimeline(millisecondsDt);
+    capTimer.notify();
 
     if (accumulatedDt >= TICKS_PER_FRAME) {
       context2dProvider.paintBackground();

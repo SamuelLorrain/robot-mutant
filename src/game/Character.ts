@@ -5,6 +5,7 @@ import { Vec2D } from "@/common/Vec2D";
 import { CharacterException } from "./exceptions";
 import { AnimatedTile } from "./AnimatedTile";
 import { GameStateProvider } from "./GameStateProvider";
+import { PublisherEvent } from "@/common/behavioral/PublisherEvent";
 
 export type Direction = "front" | "back" | "left" | "right";
 export type Action = "idle" | "begin-walk" | "walking" | "attack" | "take-damage";
@@ -104,9 +105,12 @@ export class Character {
     return tile;
   }
 
-  public updateTimeline(dt: DOMHighResTimeStamp) {
-    this._updateAnimation(dt);
-    this._moveCharacterToTarget(dt);
+  public update(event: PublisherEvent) {
+    if (event.eventType !== "TimerEvent") {
+      return;
+    }
+    this._updateAnimation(event.data);
+    this._moveCharacterToTarget(event.data);
   }
 
   private _updateAnimation(dt: DOMHighResTimeStamp) {
