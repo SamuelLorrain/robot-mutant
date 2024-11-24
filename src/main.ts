@@ -113,17 +113,15 @@ window.addEventListener('load', async () => {
     if (gameStateProvider.gameState == "Active") {
       selector.updateHoverTile(origin, map);
 
-      if (gameStateProvider.selectedCharacter != null) {
-        if (selector.hoverTile != undefined) {
-          const tile = selector.hoverTile;
-          const pathList = graph.djikstra(
-            new Vec2D(character.pos.x, character.pos.y).hash(),
-            new Vec2D(tile.position.x, tile.position.y).hash()
-          );
-          path = new Set(pathList);
-          if (path.difference(reachableTilePos).size > 0) {
-            path = new Set();
-          }
+      if (gameStateProvider.selectedCharacter != null && selector.hoverTile != null) {
+        const tile = selector.hoverTile;
+        const pathList = graph.djikstra(
+          new Vec2D(character.pos.x, character.pos.y).hash(),
+          new Vec2D(tile.position.x, tile.position.y).hash()
+        );
+        path = new Set(pathList);
+        if (path.difference(reachableTilePos).size > 0) {
+          path = new Set();
         }
       }
     } else {
@@ -131,8 +129,8 @@ window.addEventListener('load', async () => {
         path.add(new Vec2D(step.target.x, step.target.y).hash());
       }
     }
-    capTimer.notify();
 
+    capTimer.notify();
     if (accumulatedDt >= TICKS_PER_FRAME) {
       context2dProvider.paintBackground();
       drawMap(
