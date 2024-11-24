@@ -14,7 +14,7 @@ export function drawMap(
   map: WorldMap,
   hoverTile: Tile|undefined,
   cursors: SpriteSheet,
-  character: Character,
+  characters: Character[],
   path: Set<Hash>,
   gameState: GameStateProvider,
   reachableTiles: Set<Hash>
@@ -68,37 +68,39 @@ export function drawMap(
           cursors.getSprite(tile.spriteNb).size
         )
       }
-      if (
-        character.pos.eq(tile.position) ||
-        (
-          character.target != null &&
-            character.target.eq(tile.position)
-        )
-      ) {
-        const characterDrawPos = character.drawPos.add(origin);
-        const characterTile = character.tile;
-        const characterSprite = characterTile.spriteSheet.getSprite(characterTile.spriteNb);
-        ctx.drawImage(
-          characterTile.spriteSheet.picture,
-          characterSprite.position,
-          characterSprite.size,
-          new Vec2D(
-            Math.round(characterDrawPos.x),
-            Math.round(characterDrawPos.y)
-          ),
-          characterSprite.size,
-        )
-        if (gameState.selectedCharacter === character && gameState.gameState === "Active") {
-        ctx.drawImage(
-          cursors.picture,
-          cursors.getSprite(8).position,
-          cursors.getSprite(8).size,
-          new Vec2D(
-            Math.round(characterDrawPos.x),
-            Math.round(characterDrawPos.y) - (3*TILE_LEVEL_SIZE)
-          ),
-          cursors.getSprite(tile.spriteNb).size
-        )
+      for(const character of characters) {
+        if (
+          character.pos.eq(tile.position) ||
+            (
+              character.target != null &&
+                character.target.eq(tile.position)
+            )
+        ) {
+          const characterDrawPos = character.drawPos.add(origin);
+          const characterTile = character.tile;
+          const characterSprite = characterTile.spriteSheet.getSprite(characterTile.spriteNb);
+          ctx.drawImage(
+            characterTile.spriteSheet.picture,
+            characterSprite.position,
+            characterSprite.size,
+            new Vec2D(
+              Math.round(characterDrawPos.x),
+              Math.round(characterDrawPos.y)
+            ),
+            characterSprite.size,
+          )
+          if (gameState.selectedCharacter === character && gameState.isActive) {
+            ctx.drawImage(
+              cursors.picture,
+              cursors.getSprite(8).position,
+              cursors.getSprite(8).size,
+              new Vec2D(
+                Math.round(characterDrawPos.x),
+                Math.round(characterDrawPos.y) - (3*TILE_LEVEL_SIZE)
+              ),
+              cursors.getSprite(tile.spriteNb).size
+            )
+          }
         }
       }
     }

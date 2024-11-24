@@ -5,7 +5,7 @@ import Mouse from "@/ui/infra/Mouse";
 import { Vec2D } from "@/common/Vec2D";
 import CanvasPanningListener from "./ui/infra/CanvasPanningListener";
 import ScaleProvider from "./ui/domain/ScaleProvider";
-import getMap, { getCursors, getRedCharacter } from "./level";
+import getMap, { getBlueCharacter, getCursors, getRedCharacter } from "./level";
 import { AutonomousTimer } from "./common/Timer";
 import { TICKS_PER_FRAME } from "./globals";
 import { Vec3D } from "./common/Vec3D";
@@ -42,6 +42,16 @@ window.addEventListener('load', async () => {
   const character = (new CharacterBuilder())
     .setSpriteSheet(redSpriteSheet)
     .build();
+
+  const blueSpriteSheet = await getBlueCharacter();
+  const character2 = (new CharacterBuilder())
+    .setSpriteSheet(blueSpriteSheet)
+    .build();
+  character2.addObserver(gameStateProvider);
+  character2.pos = new Vec3D(4, 6, 0);
+  const a = map.tile(character2.pos);
+  character2.drawPos = a.drawPos;
+
   character.addObserver(gameStateProvider);
   character.pos = new Vec3D(1, 1, 1);
   const tileToMap = map.tile(character.pos);
@@ -50,7 +60,7 @@ window.addEventListener('load', async () => {
   let reachableTilePos: Set<Hash> = new Set();
 
   const onClick = (_: MouseEvent) => {
-    if (gameStateProvider.gameState !== "Active") {
+    if (gameStateProvider.isWaiting) {
       return;
     }
     const tile = selector.hoverTile;
@@ -59,10 +69,19 @@ window.addEventListener('load', async () => {
       reachableTilePos = new Set();
       return;
     }
-    if (tile.position.eq(character.pos)) {
+    if (tile.position.eq(character.pos) && gameStateProvider.gameState == "Player1Turn") {
       gameStateProvider.selectedCharacter = character;
       const floodFillResult = graph.floodFill(
         new Vec2D(character.pos.x, character.pos.y).hash(),
+        3,
+        map.lockedTilesPos2D
+    )
+      reachableTilePos = floodFillResult;
+      return;
+    } else if (tile.position.eq(character2.pos) && gameStateProvider.gameState == "Player2Turn") {
+      gameStateProvider.selectedCharacter = character2;
+      const floodFillResult = graph.floodFill(
+        new Vec2D(character2.pos.x, character2.pos.y).hash(),
         3,
         map.lockedTilesPos2D
     )
@@ -75,14 +94,14 @@ window.addEventListener('load', async () => {
     }
 
     const path = graph.djikstra(
-        new Vec2D(character.pos.x, character.pos.y).hash(),
+        new Vec2D(gameStateProvider.selectedCharacter.pos.x, gameStateProvider.selectedCharacter.pos.y).hash(),
         new Vec2D(tile.position.x, tile.position.y).hash()
       )
     if (new Set(path).difference(reachableTilePos).size > 0) {
       return;
     }
-    gameStateProvider.gameState = "Waiting";
-    character.startMove(path.map(Vec2D.unhash), map);
+    gameStateProvider.nextState();
+    gameStateProvider.selectedCharacter.startMove(path.map(Vec2D.unhash), map);
     reachableTilePos = new Set();
     gameStateProvider.selectedCharacter = undefined;
   }
@@ -92,6 +111,7 @@ window.addEventListener('load', async () => {
   const capTimer = new AutonomousTimer();
   capTimer.start();
   capTimer.addObserver(character);
+  capTimer.addObserver(character2);
   capTimer.addObserver(map);
 
   let lastTime = 0;
@@ -110,13 +130,13 @@ window.addEventListener('load', async () => {
     );
 
     let path: Set<Hash> = new Set();
-    if (gameStateProvider.gameState == "Active") {
+    if (gameStateProvider.isActive) {
       selector.updateHoverTile(origin, map);
 
       if (gameStateProvider.selectedCharacter != null && selector.hoverTile != null) {
         const tile = selector.hoverTile;
         const pathList = graph.djikstra(
-          new Vec2D(character.pos.x, character.pos.y).hash(),
+          new Vec2D(gameStateProvider.selectedCharacter.pos.x, gameStateProvider.selectedCharacter.pos.y).hash(),
           new Vec2D(tile.position.x, tile.position.y).hash()
         );
         path = new Set(pathList);
@@ -139,7 +159,7 @@ window.addEventListener('load', async () => {
         map,
         selector.hoverTile,
         cursors,
-        character,
+        [character, character2],
         path,
         gameStateProvider,
         reachableTilePos
