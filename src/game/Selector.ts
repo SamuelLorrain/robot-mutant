@@ -3,12 +3,15 @@ import Mouse from "@/ui/infra/Mouse";
 import { WorldMap } from "./WorldMap";
 import { Tile } from "./Tile";
 import Context2DProvider from "@/ui/infra/Context2DProvider";
+import { Publisher } from "@/common/behavioral/Publisher";
+import { Observer } from "@/common/behavioral/Observer";
 
-export class Selector {
+export class Selector implements Publisher {
   private _mouse: Mouse;
   private _hoverTile?: Tile;
   private _cursorPositionOnMouseDown?: Vec2D;
   private _context2dProvider: Context2DProvider;
+  private _observers: Observer[];
 
   constructor (
     mouse: Mouse,
@@ -21,12 +24,26 @@ export class Selector {
     this._context2dProvider = context2DProvider;
     this._initMouseDown();
     this._initMouseUp(onClick);
+    this._observers = [];
   }
 
   private _initMouseDown() {
     this._context2dProvider.canvas.addEventListener('mousedown', (e: MouseEvent) => {
       this._cursorPositionOnMouseDown = new Vec2D(e.clientX, e.clientY);
     });
+  }
+
+  public addObserver(observer: Observer) {
+    this._observers.push(observer);
+  }
+
+  public notify() {
+    for(const observer of this._observers) {
+      observer.update({
+        data: null,
+        eventType: "ClickEvent"
+      })
+    }
   }
 
   private _initMouseUp(f: (e: MouseEvent) => void) {
@@ -36,6 +53,7 @@ export class Selector {
         return;
       }
       f(e);
+      this.notify();
     });
   }
 
