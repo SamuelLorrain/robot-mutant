@@ -1,12 +1,12 @@
 import { Observer } from "@/common/behavioral/Observer";
 import { Character } from "./Character";
-import { PublisherEventType } from "@/common/behavioral/PublisherEvent";
+import { PublisherEvent, PublisherEventType } from "@/common/behavioral/PublisherEvent";
 import { Publisher } from "@/common/behavioral/Publisher";
 
 type GameState =  "Active" | "Waiting";
 
 
-export class GameStateProvider implements Publisher {
+export class GameStateProvider implements Publisher, Observer {
   private _gameState: GameState;
   public selectedCharacter?: Character;
   private _observers: Observer[];
@@ -27,6 +27,12 @@ export class GameStateProvider implements Publisher {
         data: this._gameState,
         eventType: "GameStateEvent" as PublisherEventType
       });
+    }
+  }
+
+  public update(event: PublisherEvent) {
+    if (event.eventType === "EndMovementEvent") {
+      this.gameState = "Active";
     }
   }
 
