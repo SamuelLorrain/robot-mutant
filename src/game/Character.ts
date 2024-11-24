@@ -4,8 +4,9 @@ import { Tile } from "./Tile";
 import { Vec2D } from "@/common/Vec2D";
 import { CharacterException } from "./exceptions";
 import { AnimatedTile } from "./AnimatedTile";
-import { GameStateProvider } from "./GameStateProvider";
 import { PublisherEvent } from "@/common/behavioral/PublisherEvent";
+import { Publisher } from "@/common/behavioral/Publisher";
+import { Observer } from "@/common/behavioral/Observer";
 
 export type Direction = "front" | "back" | "left" | "right";
 export type Action = "idle" | "begin-walk" | "walking" | "attack" | "take-damage";
@@ -17,7 +18,7 @@ type PathStep = {
 
 const CHARACTER_SPEED = 40;
 
-export class Character {
+export class Character implements Observer, Publisher {
   private _pos: Vec3D;
   private _drawPos: Vec2D;
   private _direction: Direction;
@@ -28,9 +29,9 @@ export class Character {
   private _targetDrawPos?: Vec2D;
   private _targetPath: PathStep[];
   private _velocity: Vec2D;
-  private _gameStateProvider?: GameStateProvider;
+  private _observers: Observer[];
 
-  constructor(tiles: Map<string, Tile>, gameStateProvider: GameStateProvider) {
+  constructor(tiles: Map<string, Tile>) {
     this._pos = new Vec3D();
     this._direction = "front";
     this._action = "idle";
@@ -42,7 +43,7 @@ export class Character {
     this._targetDrawPos = undefined;
     this._targetPath = [];
     this._velocity = new Vec2D();
-    this._gameStateProvider = gameStateProvider;
+    this._observers = [];
   }
 
   public set pos(pos: Vec3D) {
@@ -89,10 +90,6 @@ export class Character {
     this._target = target;
   }
 
-  public set gameStateProvider(gameStateProvider: GameStateProvider) {
-    this._gameStateProvider = gameStateProvider;
-  }
-
   private _retrieveCurrentTile() {
     const tile = this._tilesMap.get(`${this._direction} ${this._action}`);
     if (tile == null) {
@@ -111,6 +108,19 @@ export class Character {
     }
     this._updateAnimation(event.data);
     this._moveCharacterToTarget(event.data);
+  }
+
+  public addObserver(observer: Observer) {
+    this._observers.push(observer);
+  }
+
+  public notify() {
+    for(const observer of this._observers) {
+      observer.update({
+        data: null,
+        eventType: "EndMovementEvent"
+      })
+    }
   }
 
   private _updateAnimation(dt: DOMHighResTimeStamp) {
@@ -162,9 +172,7 @@ export class Character {
       this._target = undefined;
       this._targetDrawPos = undefined;
       if (this._targetPath.length === 0) {
-        if (this._gameStateProvider != null) {
-          this._gameStateProvider.gameState = "Active";
-        }
+        this.notify();
       }
     }
   }

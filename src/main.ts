@@ -42,7 +42,7 @@ window.addEventListener('load', async () => {
   const character = (new CharacterBuilder())
     .setSpriteSheet(redSpriteSheet)
     .build();
-  character.gameStateProvider = gameStateProvider;
+  character.addObserver(gameStateProvider);
   character.pos = new Vec3D(1, 1, 1);
   const tileToMap = map.tile(character.pos);
   character.drawPos = tileToMap.drawPos;
