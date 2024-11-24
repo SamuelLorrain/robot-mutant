@@ -1,4 +1,7 @@
-export type PublisherEventType = "TimerEvent" | "ResizeEvent" | "ScaleEvent";
+export type PublisherEventType = "TimerEvent"
+  | "ResizeEvent"
+  | "ScaleEvent"
+  | "GameStateEvent";
 
 export type PublisherEvent = {
   data: any,
