@@ -89,7 +89,7 @@ export function drawMap(
             ),
             characterSprite.size,
           )
-          if (gameState.selectedCharacter === character && gameState.isActive) {
+          if ((gameState.gameState === "Player1Turn" && character.name == "p1") || (gameState.gameState === "Player2Turn" && character.name == "p2")) {
             ctx.drawImage(
               cursors.picture,
               cursors.getSprite(8).position,

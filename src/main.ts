@@ -42,6 +42,10 @@ window.addEventListener('load', async () => {
   const character = (new CharacterBuilder())
     .setSpriteSheet(redSpriteSheet)
     .build();
+  character.addObserver(gameStateProvider);
+  character.pos = new Vec3D(1, 1, 1);
+  character.drawPos = map.tile(character.pos).drawPos;
+  character.name = "p1";
 
   const blueSpriteSheet = await getBlueCharacter();
   const character2 = (new CharacterBuilder())
@@ -49,13 +53,9 @@ window.addEventListener('load', async () => {
     .build();
   character2.addObserver(gameStateProvider);
   character2.pos = new Vec3D(4, 6, 0);
-  const a = map.tile(character2.pos);
-  character2.drawPos = a.drawPos;
+  character2.drawPos = map.tile(character2.pos).drawPos;
+  character2.name = "p2";
 
-  character.addObserver(gameStateProvider);
-  character.pos = new Vec3D(1, 1, 1);
-  const tileToMap = map.tile(character.pos);
-  character.drawPos = tileToMap.drawPos;
 
   let reachableTilePos: Set<Hash> = new Set();
 

@@ -57,6 +57,11 @@ export default class Context2DProvider implements Observer {
     this._ctx.fillRect(0,0, this.canvas.width, this.canvas.height);
   }
 
+  public setFilter(filter: string) {
+    this._ctx.filter = filter;
+  }
+
+
   public update(event: PublisherEvent) {
     if (event.eventType === "ScaleEvent") {
       this._canvas.style.scale = event.data.toString();

@@ -30,6 +30,7 @@ export class Character implements Observer, Publisher {
   private _targetPath: PathStep[];
   private _velocity: Vec2D;
   private _observers: Observer[];
+  public name = "";
 
   constructor(tiles: Map<string, Tile>) {
     this._pos = new Vec3D();
