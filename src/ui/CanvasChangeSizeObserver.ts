@@ -1,4 +1,4 @@
-import ScaleProvider from "../domain/ScaleProvider";
+import ScaleProvider from "@/ui/ScaleProvider";
 import { Publisher } from "@/common/behavioral/Publisher";
 import { Observer } from "@/common/behavioral/Observer";
 import { PublisherEventType } from "@/common/behavioral/PublisherEvent";
