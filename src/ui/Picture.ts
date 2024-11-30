@@ -1,4 +1,4 @@
-import { ImageDataException, PictureException } from "../exceptions";
+import { ImageDataException, PictureException } from "./exceptions";
 
 export default class Picture {
   private _image_bitmap: ImageBitmap;
