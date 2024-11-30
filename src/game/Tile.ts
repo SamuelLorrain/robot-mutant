@@ -1,50 +1,20 @@
-import { Vec2D } from "@/common/Vec2D";
 import { Vec3D } from "@/common/Vec3D";
-import { SpriteSheet } from "./SpriteSheet";
+import { Sprite } from "@/ui/Sprite";
 
-export interface Tile {
-  get position(): Vec3D;
-  get drawPos(): Vec2D;
-  get spriteSheet(): SpriteSheet;
-  get spriteNb(): number;
-  get blocked(): boolean;
-}
-
-export class StaticTile implements Tile {
+export class Tile {
   private _pos: Vec3D;
-  private _drawPos: Vec2D;
-  private _spriteSheet: SpriteSheet;
-  private _spriteNb: number;
+  private _sprite: Sprite;
 
-  constructor(
-    pos: Vec3D,
-    drawPos: Vec2D,
-    spriteSheet: SpriteSheet,
-    spriteNb: number,
-  ) {
+  constructor(pos: Vec3D, sprite: Sprite) {
     this._pos = pos;
-    this._drawPos = drawPos;
-    this._spriteSheet = spriteSheet;
-    this._spriteNb = spriteNb;
+    this._sprite = sprite;
   }
 
-  public get position() {
+  public get pos() {
     return this._pos;
   }
 
-  public get drawPos() {
-    return this._drawPos;
-  }
-
-  public get spriteSheet() {
-    return this._spriteSheet;
-  }
-
-  public get spriteNb() {
-    return this._spriteNb;
-  }
-
-  public get blocked(): boolean {
-    return this._spriteSheet.getSprite(this._spriteNb).blocked;
+  public get sprite() {
+    return this._sprite;
   }
 }
