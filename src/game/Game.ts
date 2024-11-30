@@ -3,6 +3,8 @@ import { TICKS_PER_FRAME } from "@/globals";
 import { Renderer } from "./Renderer";
 import { Updater } from "./Updater";
 import { Selector } from "./Selector";
+import { WorldMap } from "./WorldMap";
+import { GameState } from "./GameState";
 
 export class Game {
   readonly _renderer: Renderer;
@@ -33,14 +35,15 @@ export class Game {
     this._mainClock.start();
   }
 
-  public gameLoop() {
+  public gameLoop(gameState: GameState, worldMap: WorldMap) {
     const now = this._mainClock.getTicks();
     const millisecondsDt = now - this._lastTime;
     this._lastTime = now;
     this._accumulatedDt += millisecondsDt;
 
-    this._updater.update(this._accumulatedDt)
     this._selector.updateHoverTile();
+    this._selector.handleClickEvents(gameState, worldMap);
+    this._updater.updateTimeline(this._accumulatedDt)
 
     if (this._accumulatedDt >= TICKS_PER_FRAME) {
       this._renderer.cleanUp();
@@ -49,6 +52,6 @@ export class Game {
     }
 
     this._countedFrames += 1;
-    requestAnimationFrame(this.gameLoop);
+    requestAnimationFrame(() => this.gameLoop(gameState, worldMap));
   }
 }

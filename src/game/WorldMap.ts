@@ -3,11 +3,13 @@ import { Vec3D } from "@/common/Vec3D";
 import { Tile } from "@/game/Tile";
 import { Vec2D } from "@/common/Vec2D";
 import { Character } from "./Character";
+import { Sprite } from "@/ui/Sprite";
 
 export class WorldMap {
   private _tiles: Map<Hash, Tile>;
   private _2DTiles: Map<Hash, Tile>;
   private _hoverTile?: Tile;
+  private _tileInformationsSprite: Sprite;
 
   private _characters: Map<Hash, Character>;
 
@@ -15,13 +17,19 @@ export class WorldMap {
 
   constructor(
     tiles: Map<Hash, Tile>,
+    tileInformationsSprite: Sprite
   ) {
     this._tiles = tiles;
     this._2DTiles = new Map();
     this._hoverTile = undefined;
     this._characters = new Map();
     this._tilesInformations = new Map<Hash, Tile>;
+    this._tileInformationsSprite = tileInformationsSprite;
     this._update2DTiles();
+  }
+
+  public get tileInformationsSprite() {
+    return this._tileInformationsSprite;
   }
 
   public update(hoverTilePosition: Vec3D|undefined) {

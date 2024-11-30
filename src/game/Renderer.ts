@@ -4,7 +4,6 @@ import { Vec2D } from "@/common/Vec2D";
 import { Tile } from "./Tile";
 import { WorldMap } from "./WorldMap";
 import { Sprite } from "@/ui/Sprite";
-import { GameState } from "./GameState";
 
 export type DrawnTile = {
   tile: Tile,
@@ -24,13 +23,11 @@ export class Renderer {
   private _drawnTiles: DrawnTile[] = [];
   private _cursor: Sprite;
   private _worldMap?: WorldMap;
-  private _gameState: GameState;
 
-  constructor(cursor: Sprite, gameState: GameState) {
+  constructor(cursor: Sprite) {
     this._context2DProvider = Context2DProvider.getInstance();
     this._cursor = cursor;
     this._worldMap = undefined;
-    this._gameState = gameState;
   }
 
   public cleanUp() {
