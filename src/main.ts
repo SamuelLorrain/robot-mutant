@@ -1,175 +1,76 @@
 import "./style.css";
-import Context2DProvider from '@/ui/infra/Context2DProvider';
-import CanvasChangeSizeObserver from "@/ui/infra/CanvasChangeSizeObserver";
-import Mouse from "@/ui/infra/Mouse";
-import { Vec2D } from "@/common/Vec2D";
-import CanvasPanningListener from "./ui/infra/CanvasPanningListener";
-import ScaleProvider from "./ui/domain/ScaleProvider";
-import getMap, { getBlueCharacter, getCursors, getRedCharacter } from "./level";
-import { AutonomousTimer } from "./common/Timer";
-import { TICKS_PER_FRAME } from "./globals";
+import { createSprites, loadSpritesheet } from "./level2";
+import { SpriteSheet } from "@/ui/SpriteSheet";
+import { Game } from "./game/Game";
+import { Renderer } from "./game/Renderer";
+import { Updater } from "./game/Updater";
+import { DisplaySystem } from "./ui/DisplaySystem";
+import { Tile } from "./game/Tile";
 import { Vec3D } from "./common/Vec3D";
-import { CharacterBuilder } from "./game/CharacterBuilder";
-import { GameStateProvider } from "./game/GameStateProvider";
-import { Hash } from "./common/Hash";
+import { WorldMap } from "./game/WorldMap";
 import { Selector } from "./game/Selector";
-import { drawMap } from "./ui/infra/Drawer";
-
-let origin = new Vec2D();
+import { Character } from "./game/Character";
+import { Sprite } from "./ui/Sprite";
+import { GameState } from "./game/GameState";
 
 window.addEventListener('load', async () => {
-  const scaleProvider = new ScaleProvider(3);
-  const context2dProvider = Context2DProvider.getInstance();
-  const cursor = Mouse.getInstance();
-  const panningListener = new CanvasPanningListener(context2dProvider.canvas, new Vec2D(1500, 700));
-  const changeSizeObserver = new CanvasChangeSizeObserver(
-    context2dProvider.canvas,
-    scaleProvider
+  new DisplaySystem();
+
+  const spriteSheets = await loadSpritesheet();
+  const mapSprites = createSprites(
+    spriteSheets.get('tiles') as SpriteSheet,
+    [0, 1, 2, 3, 4, 5, 6, 8, [{durationMs: 500, spriteNb: 9}, {durationMs: 500, spriteNb: 10}]]
   );
-  changeSizeObserver.addObserver(context2dProvider);
-  changeSizeObserver.addObserver(cursor);
-  changeSizeObserver.addObserver(panningListener);
+  const characterSprites = createSprites(
+    spriteSheets.get('red') as SpriteSheet,
+    [[{durationMs: 400, spriteNb: 0}, {durationMs: 400, spriteNb: 1}]]
+  )
 
-  changeSizeObserver.notifyScaleChange();
-  changeSizeObserver.notifyResize();
+  const cursorSprites = createSprites(
+    spriteSheets.get('cursor') as SpriteSheet,
+    [0,1,2,3,4,5,6]
+  )
 
-  const gameStateProvider = new GameStateProvider();
+  const sprites = mapSprites;
+  sprites.push(...characterSprites);
 
-  const map = await getMap();
-  const graph = map.toGraph();
-  const cursors = await getCursors();
-  const redSpriteSheet = await getRedCharacter();
-  const character = (new CharacterBuilder())
-    .setSpriteSheet(redSpriteSheet)
-    .build();
-  character.addObserver(gameStateProvider);
-  character.pos = new Vec3D(1, 1, 1);
-  character.drawPos = map.tile(character.pos).drawPos;
-  character.name = "p1";
+  const gameState = new GameState();
 
-  const blueSpriteSheet = await getBlueCharacter();
-  const character2 = (new CharacterBuilder())
-    .setSpriteSheet(blueSpriteSheet)
-    .build();
-  character2.addObserver(gameStateProvider);
-  character2.pos = new Vec3D(4, 6, 0);
-  character2.drawPos = map.tile(character2.pos).drawPos;
-  character2.name = "p2";
+  const renderer = new Renderer(cursorSprites[2], gameState);
 
+  const tiles = new Map();
+  tiles.set(new Vec3D(0, 0, 0).hash(), new Tile(new Vec3D(0, 0, 0), mapSprites[1]));
+  tiles.set(new Vec3D(0, 1, 0).hash(), new Tile(new Vec3D(0, 1, 0), mapSprites[1]));
+  tiles.set(new Vec3D(1, 2, 0).hash(), new Tile(new Vec3D(1, 2, 0), mapSprites[1]));
+  tiles.set(new Vec3D(-1, 0, 0).hash(), new Tile(new Vec3D(-1, 0, 0), mapSprites[1]));
+  tiles.set(new Vec3D(-1, 0, 1).hash(), new Tile(new Vec3D(-1, 0, 1), mapSprites[1]));
+  tiles.set(new Vec3D(-1, 0, 2).hash(), new Tile(new Vec3D(-1, 0, 2), mapSprites[1]));
+  tiles.set(new Vec3D(1, 1, 0).hash(), new Tile(new Vec3D(1, 1, 0), mapSprites[8]));
+  tiles.set(new Vec3D(0, -1, 0).hash(), new Tile(new Vec3D(0, -1, 0), mapSprites[8]));
+  tiles.set(new Vec3D(1, 0, 0).hash(), new Tile(new Vec3D(1, 0, 0), mapSprites[1]));
+  tiles.set(new Vec3D(1, 3, 0).hash(), new Tile(new Vec3D(1, 3, 0), mapSprites[2]));
 
-  let reachableTilePos: Set<Hash> = new Set();
+  const selector = new Selector(renderer);
+  const updater = new Updater(selector, gameState);
+  const worldmap = new WorldMap(tiles);
 
-  const onClick = (_: MouseEvent) => {
-    if (gameStateProvider.isWaiting) {
-      return;
-    }
-    const tile = selector.hoverTile;
-    if (tile == null || tile.blocked === true) {
-      gameStateProvider.selectedCharacter = undefined;
-      reachableTilePos = new Set();
-      return;
-    }
-    if (tile.position.eq(character.pos) && gameStateProvider.gameState == "Player1Turn") {
-      gameStateProvider.selectedCharacter = character;
-      const floodFillResult = graph.floodFill(
-        new Vec2D(character.pos.x, character.pos.y).hash(),
-        3,
-        map.lockedTilesPos2D
-    )
-      reachableTilePos = floodFillResult;
-      return;
-    } else if (tile.position.eq(character2.pos) && gameStateProvider.gameState == "Player2Turn") {
-      gameStateProvider.selectedCharacter = character2;
-      const floodFillResult = graph.floodFill(
-        new Vec2D(character2.pos.x, character2.pos.y).hash(),
-        3,
-        map.lockedTilesPos2D
-    )
-      reachableTilePos = floodFillResult;
-      return;
-    }
+  const redCharacterMap:Map<string, Sprite> = new Map();
+  redCharacterMap.set(JSON.stringify(["front", "idle"]), characterSprites[0]);
 
-    if (gameStateProvider.selectedCharacter == null) {
-      return;
-    }
+  worldmap.characters = [
+    new Character(new Vec3D(0,0,0), redCharacterMap)
+  ]
 
-    const path = graph.djikstra(
-        new Vec2D(gameStateProvider.selectedCharacter.pos.x, gameStateProvider.selectedCharacter.pos.y).hash(),
-        new Vec2D(tile.position.x, tile.position.y).hash()
-      )
-    if (new Set(path).difference(reachableTilePos).size > 0) {
-      return;
-    }
-    gameStateProvider.nextState();
-    gameStateProvider.selectedCharacter.startMove(path.map(Vec2D.unhash), map);
-    reachableTilePos = new Set();
-    gameStateProvider.selectedCharacter = undefined;
-  }
+  worldmap.tilesInformations = [
+    new Tile(new Vec3D(1, 1, 0), cursorSprites[6])
+  ];
 
-  const selector = new Selector(cursor, context2dProvider, onClick);
+  updater.worldmap = worldmap;
+  updater.sprites = sprites;
+  renderer.worldmap = worldmap;
 
-  const capTimer = new AutonomousTimer();
-  capTimer.start();
-  capTimer.addObserver(character);
-  capTimer.addObserver(character2);
-  capTimer.addObserver(map);
+  const game = new Game(updater, renderer, selector);
 
-  let lastTime = 0;
-  let countedFrames = 0;
-  let accumulatedDt = 0;
-
-  const gameLoop = () => {
-    const now = capTimer.getTicks();
-    const millisecondsDt = now - lastTime;
-    lastTime = now;
-    accumulatedDt += millisecondsDt;
-
-    origin.set(
-      panningListener.drag.x,
-      panningListener.drag.y
-    );
-
-    let path: Set<Hash> = new Set();
-    if (gameStateProvider.isActive) {
-      selector.updateHoverTile(origin, map);
-
-      if (gameStateProvider.selectedCharacter != null && selector.hoverTile != null) {
-        const tile = selector.hoverTile;
-        const pathList = graph.djikstra(
-          new Vec2D(gameStateProvider.selectedCharacter.pos.x, gameStateProvider.selectedCharacter.pos.y).hash(),
-          new Vec2D(tile.position.x, tile.position.y).hash()
-        );
-        path = new Set(pathList);
-        if (path.difference(reachableTilePos).size > 0) {
-          path = new Set();
-        }
-      }
-    } else {
-      for(let step of character.targetPath) {
-        path.add(new Vec2D(step.target.x, step.target.y).hash());
-      }
-    }
-
-    capTimer.notify();
-    if (accumulatedDt >= TICKS_PER_FRAME) {
-      context2dProvider.paintBackground();
-      drawMap(
-        context2dProvider,
-        origin,
-        map,
-        selector.hoverTile,
-        cursors,
-        [character, character2],
-        path,
-        gameStateProvider,
-        reachableTilePos
-      );
-      accumulatedDt = 0;
-    }
-
-    countedFrames++;
-    requestAnimationFrame(gameLoop);
-  }
-
-  gameLoop();
+  game.init();
+  game.gameLoop();
 });
