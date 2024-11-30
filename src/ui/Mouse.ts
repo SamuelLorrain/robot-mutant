@@ -41,7 +41,7 @@ export default class Mouse implements Observer {
     return Mouse._instance;
   }
 
-  public get vec() {
+  public get pos() {
     return this._mouseVec;
   }
 
