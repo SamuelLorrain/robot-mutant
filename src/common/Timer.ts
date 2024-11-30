@@ -1,17 +1,13 @@
-import { Observer } from "./behavioral/Observer";
-import { Publisher } from "./behavioral/Publisher";
-
 /**
  * A Timer implementation
  * that rely on `performance.now()` to get
  * the time.
  */
-export class AutonomousTimer implements Publisher {
+export class AutonomousTimer {
   private _startTicks: number;
   private _pausedTicks: number;
   private _isPaused: boolean;
   private _isStarted: boolean;
-  private _observers: Observer[];
   private _deltaLastGetTicks = 0;
   private _lastGetTicks = 0;
 
@@ -20,7 +16,6 @@ export class AutonomousTimer implements Publisher {
     this._pausedTicks = 0;
     this._isPaused = false;
     this._isStarted = false;
-    this._observers =  [];
     this._deltaLastGetTicks = 0;
     this._lastGetTicks = 0;
   }
@@ -41,7 +36,6 @@ export class AutonomousTimer implements Publisher {
     this._isPaused = false;
     this._startTicks = 0;
     this._pausedTicks = 0;
-    this._deltaLastTime = 0;
     this._lastGetTicks = 0;
   }
 
@@ -77,87 +71,6 @@ export class AutonomousTimer implements Publisher {
 
   public getDeltaLastGetTicks()  {
     return this._deltaLastGetTicks
-  }
-
-  public get isPaused(): boolean {
-    return this._isStarted && this._isPaused;
-  }
-
-  public get isStarted(): boolean {
-    return this._isStarted;
-  }
-
-  addObserver(observer: Observer) {
-    this._observers.push(observer);
-  }
-
-  public notify() {
-    for(const observer of this._observers) {
-      observer.update({
-        data: this._deltaLastGetTicks,
-        eventType: "TimerEvent"
-      })
-    }
-  }
-}
-
-/**
- * A Timer implementation
- * that rely on an external source of truth
- */
-export class ManualTimer {
-  private _startTicks: number;
-  private _pausedTicks: number;
-  private _isPaused: boolean;
-  private _isStarted: boolean;
-
-  constructor() {
-    this._startTicks = 0;
-    this._pausedTicks = 0;
-    this._isPaused = false;
-    this._isStarted = false;
-  }
-
-  public start(startTime: DOMHighResTimeStamp) {
-    this._isStarted = true;
-    this._isPaused = false;
-    this._startTicks = startTime;
-    this._pausedTicks = 0;
-  }
-
-  public stop() {
-    this._isStarted = false;
-    this._isPaused = false;
-    this._startTicks = 0;
-    this._pausedTicks = 0;
-  }
-
-  public pause(timestampOnPause: DOMHighResTimeStamp) {
-    if (this._isStarted && !this._isPaused) {
-      this._isPaused = true;
-      this._pausedTicks = timestampOnPause - this._startTicks;
-      this._startTicks = 0;
-    }
-  }
-
-   public unpause(timestampUnpause: DOMHighResTimeStamp) {
-    if (this._isStarted && this._isPaused) {
-      this._isPaused = false;
-      this._startTicks = timestampUnpause - this._pausedTicks;
-      this._pausedTicks = 0;
-    }
-  }
-
-  public getTicks(timestamp: DOMHighResTimeStamp) {
-    let currentTime = -1;
-    if (this._isStarted) {
-      if (this._isPaused) {
-        currentTime = this._pausedTicks;
-      } else {
-        currentTime = timestamp - this._pausedTicks;
-      }
-    }
-    return currentTime;
   }
 
   public get isPaused(): boolean {
