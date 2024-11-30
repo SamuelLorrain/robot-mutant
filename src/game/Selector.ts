@@ -8,13 +8,13 @@ import { GameState } from "./GameState";
 import { WorldMap } from "./WorldMap";
 
 export interface ClickEvent {
-  tile?: Vec3D;
+  tilePos?: Vec3D;
   pixel?: Vec2D;
   kind: string;
 };
 
 export interface ClickTileEvent extends ClickEvent {
-  tile: Vec3D;
+  tilePos: Vec3D;
   pixel: Vec2D;
   kind: "ClickTileEvent";
 };
@@ -25,11 +25,11 @@ export interface ClickPixelEvent extends ClickEvent {
 };
 
 export const isClickTileEvent = (clickEvent: ClickEvent): clickEvent is ClickTileEvent => {
-  return clickEvent.tile instanceof Vec3D;
+  return clickEvent.tilePos instanceof Vec3D;
 }
 
 export const isClickPixelEvent = (clickEvent: ClickEvent): clickEvent is ClickPixelEvent => {
-  return clickEvent.tile == null;
+  return clickEvent.tilePos == null;
 }
 
 export class Selector {
@@ -65,7 +65,7 @@ export class Selector {
       }
       if (this._hoverTile != null) {
         const event = {
-          tile: this._hoverTile.tile.pos,
+          tilePos: this._hoverTile.tile.pos,
           pixel: cursorPositionOnMouseUp,
           kind: "ClickTileEvent"
         } satisfies ClickTileEvent;
