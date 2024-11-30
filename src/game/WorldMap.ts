@@ -4,6 +4,8 @@ import { Tile } from "@/game/Tile";
 import { Vec2D } from "@/common/Vec2D";
 import { Character } from "./Character";
 import { Sprite } from "@/ui/Sprite";
+import { Graph } from "@/common/Graph";
+import { worldMaptoGraph } from "./WorldMapToGraph";
 
 export class WorldMap {
   private _tiles: Map<Hash, Tile>;
@@ -14,6 +16,7 @@ export class WorldMap {
   private _characters: Map<Hash, Character>;
 
   private _tilesInformations: Map<Hash, Tile>;
+  private _graph?: Graph;
 
   constructor(
     tiles: Map<Hash, Tile>,
@@ -25,7 +28,9 @@ export class WorldMap {
     this._characters = new Map();
     this._tilesInformations = new Map<Hash, Tile>;
     this._tileInformationsSprite = tileInformationsSprite;
+    this._graph = undefined;
     this._update2DTiles();
+    this._updateGraph();
   }
 
   public get tileInformationsSprite() {
@@ -61,6 +66,10 @@ export class WorldMap {
     return this.tiles.get(pos.hash());
   }
 
+  public get tile2D() {
+    return this._2DTiles;
+  }
+
   public set characters(characters: Character[]) {
     this._characters = new Map();
     for(const character of characters) {
@@ -83,6 +92,10 @@ export class WorldMap {
     return this._tilesInformations;
   }
 
+  public get graph() {
+    return this._graph;
+  }
+
   private _update2DTiles() {
     for(let tile of this._tiles.values()) {
       const vec2D = new Vec2D(tile.pos.x, tile.pos.y);
@@ -92,5 +105,9 @@ export class WorldMap {
       }
       this._2DTiles.set(vec2D.hash(), tile);
     }
+  }
+
+  private _updateGraph() {
+    this._graph = worldMaptoGraph(this);
   }
 }
