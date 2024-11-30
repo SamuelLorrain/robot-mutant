@@ -1,14 +1,16 @@
 import { Observer } from "@/common/behavioral/Observer";
-import { PublisherEvent } from "@/common/behavioral/PublisherEvent";
+import { Publisher } from "@/common/behavioral/Publisher";
+import { PublisherEvent, PublisherEventType } from "@/common/behavioral/PublisherEvent";
 import { Vec2D } from "@/common/Vec2D";
 
-export default class CanvasPanningListener implements Observer {
+export default class CanvasPanningListener implements Observer, Publisher {
   readonly _canvas: HTMLCanvasElement;
   private _dragging: boolean;
   private _drag: Vec2D;
   private _dragstart: Vec2D;
   private _currentDragging: Vec2D;
   private _scale: number;
+  private _observers: Observer[];
 
   constructor(canvas: HTMLCanvasElement, initialOffset?: Vec2D) {
     this._canvas = canvas;
@@ -21,6 +23,7 @@ export default class CanvasPanningListener implements Observer {
     this._dragstart = new Vec2D();
     this._currentDragging = new Vec2D();
     this._scale = 1;
+    this._observers = [];
 
     this._canvas.addEventListener('mousedown', (e: MouseEvent) => {
       e.preventDefault();
@@ -51,11 +54,28 @@ export default class CanvasPanningListener implements Observer {
         return;
       }
 
-      this._drag.set(new Vec2D(
+      this.drag = new Vec2D(
         (e.clientX * window.devicePixelRatio / this._scale) - this._dragstart.x + this._currentDragging.x,
         (e.clientY * window.devicePixelRatio / this._scale) - this._dragstart.y + this._currentDragging.y
-      ));
+      );
     });
+  }
+
+  public addObserver(observer: Observer) {
+    this._observers.push(observer);
+  }
+
+  public notifyChanges() {
+    const event =  {
+      eventType: "DragEvent" as PublisherEventType,
+      data: {
+        x: this.drag.x,
+        y: this.drag.y
+      }
+    }
+    for(const observer of this._observers) {
+      observer.update(event);
+    }
   }
 
   public get drag(): Vec2D {
@@ -68,6 +88,7 @@ export default class CanvasPanningListener implements Observer {
 
   public set drag(vec: Vec2D) {
     this._drag = new Vec2D(vec);
+    this.notifyChanges();
   }
 
   public update(event: PublisherEvent) {
@@ -75,7 +96,7 @@ export default class CanvasPanningListener implements Observer {
       this._scale = event.data;
     }
     else if (event.eventType === "ResizeEvent") {
-      this._drag = new Vec2D(event.data.width/2, event.data.height/2);
+      this.drag = new Vec2D(event.data.width/2, event.data.height/2);
     }
   }
 }
