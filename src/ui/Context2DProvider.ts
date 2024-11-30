@@ -7,12 +7,15 @@ import { PublisherEvent } from "@/common/behavioral/PublisherEvent";
 
 /* Service class used to get the 2D context of the webpage */
 export default class Context2DProvider implements Observer {
-  private readonly _ctx: CanvasRenderingContext2D;
+  public readonly _ctx: CanvasRenderingContext2D;
   private readonly _canvas: HTMLCanvasElement;
+  private _origin: Vec2D;
 
   private static _instance: Context2DProvider;
 
-  private constructor() {
+  private constructor(origin: Vec2D) {
+    this._origin = new Vec2D(origin);
+
     this._canvas = document.querySelector(conf.canvas.querySelector) as HTMLCanvasElement;;
 
     if (this._canvas == null) {
@@ -36,7 +39,7 @@ export default class Context2DProvider implements Observer {
 
   public static getInstance(): Context2DProvider {
     if (!Context2DProvider._instance) {
-      Context2DProvider._instance = new Context2DProvider();
+      Context2DProvider._instance = new Context2DProvider(new Vec2D());
     }
     return Context2DProvider._instance;
   }
@@ -70,7 +73,16 @@ export default class Context2DProvider implements Observer {
         event.data.width,
         event.data.height
       )
+    } else if (event.eventType === "DragEvent") {
+      this._origin = new Vec2D(
+        event.data.x,
+        event.data.y,
+      )
     }
+  }
+
+  public get origin() {
+    return this._origin;
   }
 
   /**
@@ -91,7 +103,7 @@ export default class Context2DProvider implements Observer {
         picture.bitmap,
         posSrc.x, posSrc.y,
         sizeSrc.x, sizeSrc.y,
-        posDst.x, posDst.y,
+        Math.floor(posDst.x + this._origin.x), Math.floor(posDst.y + this._origin.y),
         (sizeDst as Vec2D).x, (sizeDst as Vec2D).y
       );
     }
