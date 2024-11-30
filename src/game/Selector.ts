@@ -4,6 +4,8 @@ import Context2DProvider from "@/ui/Context2DProvider";
 import { DrawnTile, Renderer } from "./Renderer";
 import { Vec3D } from "@/common/Vec3D";
 import { Queue } from "@/common/Queue";
+import { GameState } from "./GameState";
+import { WorldMap } from "./WorldMap";
 
 export interface ClickEvent {
   tile?: Vec3D;
@@ -88,6 +90,16 @@ export class Selector {
 
   public getEvent() {
     return this._clickEventQueue.dequeue();
+  }
+
+  public handleClickEvents(gameState: GameState, worldMap: WorldMap) {
+    while (this.hasPendingEvent()) {
+      const event: ClickEvent = this.getEvent();
+      gameState.handleEvent(
+        event,
+        worldMap
+      );
+    }
   }
 
   public updateHoverTile() {

@@ -33,10 +33,11 @@ window.addEventListener('load', async () => {
 
   const sprites = mapSprites;
   sprites.push(...characterSprites);
+  sprites.push(...cursorSprites);
 
   const gameState = new GameState();
 
-  const renderer = new Renderer(cursorSprites[2], gameState);
+  const renderer = new Renderer(cursorSprites[2]);
 
   const tiles = new Map();
   tiles.set(new Vec3D(0, 0, 0).hash(), new Tile(new Vec3D(0, 0, 0), mapSprites[1]));
@@ -51,8 +52,8 @@ window.addEventListener('load', async () => {
   tiles.set(new Vec3D(1, 3, 0).hash(), new Tile(new Vec3D(1, 3, 0), mapSprites[2]));
 
   const selector = new Selector(renderer);
-  const updater = new Updater(selector, gameState);
-  const worldmap = new WorldMap(tiles);
+  const updater = new Updater(selector);
+  const worldmap = new WorldMap(tiles, sprites[16]);
 
   const redCharacterMap:Map<string, Sprite> = new Map();
   redCharacterMap.set(JSON.stringify(["front", "idle"]), characterSprites[0]);
@@ -61,9 +62,7 @@ window.addEventListener('load', async () => {
     new Character(new Vec3D(0,0,0), redCharacterMap)
   ]
 
-  worldmap.tilesInformations = [
-    new Tile(new Vec3D(1, 1, 0), cursorSprites[6])
-  ];
+  worldmap.tilesInformations = [];
 
   updater.worldmap = worldmap;
   updater.sprites = sprites;
@@ -72,5 +71,5 @@ window.addEventListener('load', async () => {
   const game = new Game(updater, renderer, selector);
 
   game.init();
-  game.gameLoop();
+  game.gameLoop(gameState, worldmap);
 });

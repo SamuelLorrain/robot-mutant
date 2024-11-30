@@ -1,18 +1,15 @@
 import { Sprite } from "@/ui/Sprite";
 import { WorldMap } from "./WorldMap";
-import { ClickEvent, isClickPixelEvent, isClickTileEvent, Selector } from "./Selector";
-import { GameState } from "./GameState";
+import { Selector } from "./Selector";
 
 export class Updater {
   private _sprites: Sprite[];
   // TODO makes it mandatory
   private _worldmap?: WorldMap;
-  private _gameState: GameState;
   private readonly _selector: Selector;
 
-  constructor(selector: Selector, gameState: GameState) {
+  constructor(selector: Selector) {
     this._sprites = [];
-    this._gameState = gameState;
     this._selector = selector;
   }
 
@@ -24,8 +21,7 @@ export class Updater {
     this._worldmap = worldMap;
   }
 
-  public update(db: DOMHighResTimeStamp) {
-    this._handleSelectorEvents();
+  public updateTimeline(db: DOMHighResTimeStamp) {
     for(const sprite of this._sprites) {
       sprite.updateTimeline(db);
     }
@@ -34,15 +30,4 @@ export class Updater {
     );
   }
 
-  private _handleSelectorEvents() {
-    while (this._selector.hasPendingEvent()) {
-      const event: ClickEvent = this._selector.getEvent();
-      if (isClickTileEvent(event)) {
-        const character = this._worldmap?.characters.get(event.tile.hash());
-        this._gameState.selectedCharacter = character;
-      } else if (isClickPixelEvent(event)) {
-        this._gameState.selectedCharacter = undefined;
-      }
-    }
-  }
 }
