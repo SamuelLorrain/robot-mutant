@@ -24,10 +24,16 @@ window.addEventListener('load', async () => {
   const characterSprites = createSprites(
     spriteSheets.get('red') as SpriteSheet,
     [
+      // idle
       [{durationMs: 400, spriteNb: 0}, {durationMs: 400, spriteNb: 1}],
       [{durationMs: 400, spriteNb: 4}, {durationMs: 400, spriteNb: 5}],
       [{durationMs: 400, spriteNb: 32}, {durationMs: 400, spriteNb: 33}],
-      [{durationMs: 400, spriteNb: 36}, {durationMs: 400, spriteNb: 37}]
+      [{durationMs: 400, spriteNb: 36}, {durationMs: 400, spriteNb: 37}],
+      // walking
+      [{durationMs: 400, spriteNb: 16}, {durationMs: 400, spriteNb: 17}],
+      [{durationMs: 400, spriteNb: 20}, {durationMs: 400, spriteNb: 21}],
+      [{durationMs: 400, spriteNb: 48}, {durationMs: 400, spriteNb: 49}],
+      [{durationMs: 400, spriteNb: 52}, {durationMs: 400, spriteNb: 53}]
     ]
   )
 
@@ -50,7 +56,7 @@ window.addEventListener('load', async () => {
     }
   }
 
-  const worldmap = new WorldMap(tiles, sprites[19], sprites[18]);
+  const worldmap = new WorldMap(tiles, cursorSprites[6], cursorSprites[7]);
   const renderer = new Renderer(cursorSprites[2], worldmap);
   const selector = new Selector(renderer);
   const updater = new Updater(selector);
@@ -60,6 +66,10 @@ window.addEventListener('load', async () => {
   redCharacterMap.set(JSON.stringify(["back", "idle"]), characterSprites[1]);
   redCharacterMap.set(JSON.stringify(["right", "idle"]), characterSprites[2]);
   redCharacterMap.set(JSON.stringify(["left", "idle"]), characterSprites[3]);
+  redCharacterMap.set(JSON.stringify(["front", "walking"]), characterSprites[4]);
+  redCharacterMap.set(JSON.stringify(["back", "walking"]), characterSprites[5]);
+  redCharacterMap.set(JSON.stringify(["right", "walking"]), characterSprites[6]);
+  redCharacterMap.set(JSON.stringify(["left", "walking"]), characterSprites[7]);
 
   worldmap.characters = [
     new Character(new Vec3D(3,3,0), redCharacterMap)
