@@ -1,6 +1,5 @@
 import { Character } from "./Character";
 import { ClickEvent, isClickPixelEvent, isClickTileEvent } from "./Selector";
-import { Tile } from "./Tile";
 import { WorldMap } from "./WorldMap";
 
 export type TurnStep = {
@@ -15,11 +14,9 @@ const BeginTurn = {
         worldMap.tilesInformations = [];
         return;
       }
+      worldMap.computeTilesInformations(character.pos, 2);
       gameState.selectedCharacter = character;
       gameState.turnStep = CharacterSelected;
-      worldMap.tilesInformations = [
-        new Tile(event.tilePos, worldMap.tileInformationsSprite)
-      ]
     }
   }
 } satisfies TurnStep;
