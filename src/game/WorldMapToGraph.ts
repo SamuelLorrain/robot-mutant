@@ -1,12 +1,12 @@
 import { Graph } from "@/common/Graph";
-import { WorldMap } from "./WorldMap";
 import { Vec2D } from "@/common/Vec2D";
 import { Hash } from "@/common/Hash";
+import { Tile } from "./Tile";
 
-export const worldMaptoGraph = (worldMap: WorldMap): Graph => {
+export const tiles2DToGraph = (tiles: Map<Hash, Tile>): Graph => {
   const map = new Map<Hash, Hash[]>();
 
-  for (const [k, _] of worldMap.tile2D) {
+  for (const [k, _] of tiles) {
     const vec = new Vec2D(Vec2D.unhash(k));
 
     const neighbours: Hash[] = [];
@@ -18,7 +18,7 @@ export const worldMaptoGraph = (worldMap: WorldMap): Graph => {
     ];
 
     for(const vec of n) {
-      if (worldMap.tile2D.get(vec.hash())) {
+      if (tiles.get(vec.hash())) {
         neighbours.push(vec.hash());
       }
     }
