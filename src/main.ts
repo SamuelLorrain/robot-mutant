@@ -23,7 +23,12 @@ window.addEventListener('load', async () => {
   );
   const characterSprites = createSprites(
     spriteSheets.get('red') as SpriteSheet,
-    [[{durationMs: 400, spriteNb: 0}, {durationMs: 400, spriteNb: 1}]]
+    [
+      [{durationMs: 400, spriteNb: 0}, {durationMs: 400, spriteNb: 1}],
+      [{durationMs: 400, spriteNb: 4}, {durationMs: 400, spriteNb: 5}],
+      [{durationMs: 400, spriteNb: 32}, {durationMs: 400, spriteNb: 33}],
+      [{durationMs: 400, spriteNb: 36}, {durationMs: 400, spriteNb: 37}]
+    ]
   )
 
   const cursorSprites = createSprites(
@@ -40,26 +45,24 @@ window.addEventListener('load', async () => {
   const renderer = new Renderer(cursorSprites[2]);
 
   const tiles = new Map();
-  tiles.set(new Vec3D(0, 0, 0).hash(), new Tile(new Vec3D(0, 0, 0), mapSprites[1]));
-  tiles.set(new Vec3D(0, 1, 0).hash(), new Tile(new Vec3D(0, 1, 0), mapSprites[1]));
-  tiles.set(new Vec3D(1, 2, 0).hash(), new Tile(new Vec3D(1, 2, 0), mapSprites[1]));
-  tiles.set(new Vec3D(-1, 0, 0).hash(), new Tile(new Vec3D(-1, 0, 0), mapSprites[1]));
-  tiles.set(new Vec3D(-1, 0, 1).hash(), new Tile(new Vec3D(-1, 0, 1), mapSprites[1]));
-  tiles.set(new Vec3D(-1, 0, 2).hash(), new Tile(new Vec3D(-1, 0, 2), mapSprites[1]));
-  tiles.set(new Vec3D(1, 1, 0).hash(), new Tile(new Vec3D(1, 1, 0), mapSprites[8]));
-  tiles.set(new Vec3D(0, -1, 0).hash(), new Tile(new Vec3D(0, -1, 0), mapSprites[8]));
-  tiles.set(new Vec3D(1, 0, 0).hash(), new Tile(new Vec3D(1, 0, 0), mapSprites[1]));
-  tiles.set(new Vec3D(1, 3, 0).hash(), new Tile(new Vec3D(1, 3, 0), mapSprites[2]));
+  for(let i = 0; i < 8; i++) {
+    for(let j = 0; j < 8; j++) {
+      tiles.set(new Vec3D(i, j, 0).hash(), new Tile(new Vec3D(i, j, 0), mapSprites[1]));
+    }
+  }
 
   const selector = new Selector(renderer);
   const updater = new Updater(selector);
-  const worldmap = new WorldMap(tiles, sprites[16]);
+  const worldmap = new WorldMap(tiles, sprites[19]);
 
   const redCharacterMap:Map<string, Sprite> = new Map();
   redCharacterMap.set(JSON.stringify(["front", "idle"]), characterSprites[0]);
+  redCharacterMap.set(JSON.stringify(["back", "idle"]), characterSprites[1]);
+  redCharacterMap.set(JSON.stringify(["right", "idle"]), characterSprites[2]);
+  redCharacterMap.set(JSON.stringify(["left", "idle"]), characterSprites[3]);
 
   worldmap.characters = [
-    new Character(new Vec3D(0,0,0), redCharacterMap)
+    new Character(new Vec3D(3,3,0), redCharacterMap)
   ]
 
   worldmap.tilesInformations = [];

@@ -110,4 +110,16 @@ export class WorldMap {
   private _updateGraph() {
     this._graph = worldMaptoGraph(this);
   }
+
+  public computeTilesInformations(origin: Vec3D, range: number) {
+    const currentTilesInformations = []
+    for (const [_,tile] of this._2DTiles) {
+      const manhattanDistance =
+          Math.abs(tile.pos.x - origin.x) + Math.abs(tile.pos.y - origin.y);
+      if (manhattanDistance <= range) {
+        currentTilesInformations.push(new Tile(tile.pos, this.tileInformationsSprite))
+      }
+    }
+    this.tilesInformations = currentTilesInformations;
+  }
 }
