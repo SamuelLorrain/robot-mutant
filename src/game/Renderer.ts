@@ -4,6 +4,7 @@ import { Vec2D } from "@/common/Vec2D";
 import { Tile } from "./Tile";
 import { WorldMap } from "./WorldMap";
 import { Sprite } from "@/ui/Sprite";
+import { Hash } from "@/common/Hash";
 
 export type DrawnTile = {
   tile: Tile,
@@ -22,12 +23,12 @@ export class Renderer {
   private _tiles: Tile[] = [];
   private _drawnTiles: DrawnTile[] = [];
   private _cursor: Sprite;
-  private _worldMap?: WorldMap;
+  private _worldMap: WorldMap;
 
-  constructor(cursor: Sprite) {
+  constructor(cursor: Sprite, worldMap: WorldMap) {
     this._context2DProvider = Context2DProvider.getInstance();
     this._cursor = cursor;
-    this._worldMap = undefined;
+    this._worldMap = worldMap;
   }
 
   public cleanUp() {
@@ -48,17 +49,15 @@ export class Renderer {
         drawPos,
         sprite.spriteSheet.sizeOfSprite,
       )
-      this._drawTileInformations(dTile);
+      this._drawTileLine(dTile, this._worldMap.tilesInformations);
       this._drawHoverTile(dTile);
+      this._drawTileLine(dTile, this._worldMap.currentPath);
       this._drawCharacters(dTile);
     }
   }
 
-  private _drawTileInformations(dTile: DrawnTile) {
-    if (this._worldMap == null) {
-      return;
-    }
-    const tile = this._worldMap.tilesInformations.get(dTile.tile.pos.hash());
+  private _drawTileLine(dTile: DrawnTile, tilesMap: Map<Hash, Tile>) {
+    const tile = tilesMap.get(dTile.tile.pos.hash());
     if (tile != null) {
       this._context2DProvider.drawImage(
         tile.sprite.spriteSheet.picture,
@@ -71,7 +70,7 @@ export class Renderer {
   }
 
   private _drawHoverTile(dTile: DrawnTile) {
-    if (this._worldMap?.hoverTile?.pos.eq(dTile.tile.pos)) {
+    if (this._worldMap.hoverTile?.pos.eq(dTile.tile.pos)) {
       this._context2DProvider.drawImage(
         this._cursor.spriteSheet.picture,
         this._cursor.spriteSheet.getSpritePosition(this._cursor.spriteNb),
@@ -84,9 +83,6 @@ export class Renderer {
 
   // TODO will not work when characters moves
   private _drawCharacters(dTile: DrawnTile) {
-    if (this._worldMap == null) {
-      return;
-    }
     const character = this._worldMap.characters.get(dTile.tile.pos.hash());
     if (character != null) {
       const tile = character.tile;
