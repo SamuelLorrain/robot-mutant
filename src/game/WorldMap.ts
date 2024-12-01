@@ -12,15 +12,18 @@ export class WorldMap {
   private _2DTiles: Map<Hash, Tile>;
   private _hoverTile?: Tile;
   private _tileInformationsSprite: Sprite;
+  private _pathSprite: Sprite;
 
   private _characters: Map<Hash, Character>;
 
   private _tilesInformations: Map<Hash, Tile>;
+  private _currentPath: Map<Hash, Tile>;
   private _graph?: Graph;
 
   constructor(
     tiles: Map<Hash, Tile>,
-    tileInformationsSprite: Sprite
+    tileInformationsSprite: Sprite,
+    pathSprite: Sprite
   ) {
     this._tiles = tiles;
     this._2DTiles = new Map();
@@ -28,6 +31,8 @@ export class WorldMap {
     this._characters = new Map();
     this._tilesInformations = new Map<Hash, Tile>;
     this._tileInformationsSprite = tileInformationsSprite;
+    this._currentPath = new Map<Hash, Tile>;
+    this._pathSprite = pathSprite;
     this._graph = undefined;
     this._update2DTiles();
     this._updateGraph();
@@ -35,6 +40,10 @@ export class WorldMap {
 
   public get tileInformationsSprite() {
     return this._tileInformationsSprite;
+  }
+
+  public get pathSprite() {
+    return this._pathSprite;
   }
 
   public update(hoverTilePosition: Vec3D|undefined) {
@@ -90,6 +99,17 @@ export class WorldMap {
 
   public get tilesInformations(): Map<Hash, Tile> {
     return this._tilesInformations;
+  }
+
+  public set currentPath(currentPath: Tile[]) {
+    this._currentPath = new Map();
+    for(const tile of currentPath) {
+      this._currentPath.set(tile.pos.hash(), tile);
+    }
+  }
+
+  public get currentPath(): Map<Hash, Tile> {
+    return this._currentPath;
   }
 
   public get graph() {

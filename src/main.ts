@@ -42,7 +42,6 @@ window.addEventListener('load', async () => {
 
   const gameState = new GameState();
 
-  const renderer = new Renderer(cursorSprites[2]);
 
   const tiles = new Map();
   for(let i = 0; i < 8; i++) {
@@ -51,9 +50,10 @@ window.addEventListener('load', async () => {
     }
   }
 
+  const worldmap = new WorldMap(tiles, sprites[19], sprites[18]);
+  const renderer = new Renderer(cursorSprites[2], worldmap);
   const selector = new Selector(renderer);
   const updater = new Updater(selector);
-  const worldmap = new WorldMap(tiles, sprites[19]);
 
   const redCharacterMap:Map<string, Sprite> = new Map();
   redCharacterMap.set(JSON.stringify(["front", "idle"]), characterSprites[0]);
