@@ -74,4 +74,12 @@ export class Vec3D {
     const jsonRepr = JSON.parse(hash);
     return new Vec3D(jsonRepr[0], jsonRepr[1], jsonRepr[2]);
   }
+
+  public map(f: (x: number) => number): Vec3D {
+    return new Vec3D(
+      f(this.x),
+      f(this.y),
+      f(this.z)
+    );
+  }
 }
