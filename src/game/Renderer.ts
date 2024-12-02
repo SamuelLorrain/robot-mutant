@@ -1,6 +1,7 @@
 import Context2DProvider from "@/ui/Context2DProvider";
 import { SPRITE_SIZE, TILE_LEVEL_SIZE } from "@/globals";
 import { Vec2D } from "@/common/Vec2D";
+import { Vec3D } from "@/common/Vec3D";
 import { Tile } from "./Tile";
 import { WorldMap } from "./WorldMap";
 import { Sprite } from "@/ui/Sprite";
@@ -35,9 +36,6 @@ export class Renderer {
     this._context2DProvider.paintBackground();
   }
 
-  // Multiple "z-index line"
-  // for each types of entity ?
-  // Prend direct la worldmap en entrée ?
   public render() {
     for(const dTile of this._drawnTiles) {
       const sprite = dTile.tile.sprite;
@@ -81,18 +79,19 @@ export class Renderer {
     }
   }
 
-  // TODO will not work when characters moves
   private _drawCharacters(dTile: DrawnTile) {
-    const character = this._worldMap.characters.get(dTile.tile.pos.hash());
-    if (character != null) {
-      const tile = character.tile;
-      this._context2DProvider.drawImage(
-        tile.sprite.spriteSheet.picture,
-        tile.sprite.spriteSheet.getSpritePosition(tile.sprite.spriteNb),
-        tile.sprite.spriteSheet.sizeOfSprite,
-        dTile.drawPos,
-        tile.sprite.spriteSheet.sizeOfSprite,
-      )
+    const gridPos = dTile.tile.pos;
+    for (const character of this._worldMap.characters) {
+      if (character != null && character.pos.map(Math.ceil).eq(gridPos)) {
+        const tile = character.tile;
+        this._context2DProvider.drawImage(
+          tile.sprite.spriteSheet.picture,
+          tile.sprite.spriteSheet.getSpritePosition(tile.sprite.spriteNb),
+          tile.sprite.spriteSheet.sizeOfSprite,
+          this._getDrawPos(character.pos),
+          tile.sprite.spriteSheet.sizeOfSprite,
+        )
+      }
     }
   }
 
@@ -112,7 +111,7 @@ export class Renderer {
 
     this._tiles = tilesShallowCopy;
     this._drawnTiles = this._tiles.map(tile => ({
-      drawPos: this.getDrawPos(tile),
+      drawPos: this._getDrawPos(tile.pos),
       tile: tile
     }))
   }
@@ -121,10 +120,10 @@ export class Renderer {
     return this._drawnTiles;
   }
 
-  private getDrawPos(tile: Tile) {
+  private _getDrawPos(pos: Vec3D) {
     return new Vec2D(
-      (tile.pos.x-tile.pos.y)*(SPRITE_SIZE.x/2),
-      (tile.pos.x+tile.pos.y)*(SPRITE_SIZE.y/2) - (tile.pos.z*TILE_LEVEL_SIZE)
+      (pos.x-pos.y)*(SPRITE_SIZE.x/2),
+      (pos.x+pos.y)*(SPRITE_SIZE.y/2) - (pos.z*TILE_LEVEL_SIZE)
     )
   }
 }
