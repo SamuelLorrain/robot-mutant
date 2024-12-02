@@ -1,4 +1,5 @@
 import { Character } from "./Character";
+import { GameStateException } from "./exceptions";
 import { ClickEvent, isClickPixelEvent, isClickTileEvent } from "./Selector";
 import { WorldMap } from "./WorldMap";
 
@@ -9,7 +10,7 @@ export type TurnStep = {
 const BeginTurn = {
   handleEvent(event: ClickEvent, worldMap: WorldMap, gameState: GameState) {
     if (isClickTileEvent(event)) {
-      const character = worldMap.characters.get(event.tilePos.hash());
+      const character = worldMap.characters.find(character => character.pos.eq(event.tilePos));
       if (character == null) {
         worldMap.tilesInformations = [];
         return;
@@ -30,12 +31,24 @@ const CharacterSelected = {
         gameState.selectedCharacter = undefined;
         gameState.turnStep = BeginTurn;
         return;
+      } else {
+        if (gameState.selectedCharacter == null) {
+          throw new GameStateException("Character can't be null or undefined when game is in 'CharacterSelected' state.")
+        }
+        gameState.selectedCharacter.startMoving(tileInformation);
+        gameState.turnStep = CharacterDoingAction;
       }
     } else if (isClickPixelEvent(event)) {
       worldMap.tilesInformations = [];
       gameState.selectedCharacter = undefined;
       gameState.turnStep = BeginTurn;
     }
+  }
+} satisfies TurnStep;
+
+const CharacterDoingAction = {
+  handleEvent(event: ClickEvent, worldMap: WorldMap, gameState: GameState) {
+    // Nothing can happens here
   }
 } satisfies TurnStep;
 

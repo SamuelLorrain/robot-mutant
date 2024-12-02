@@ -14,7 +14,7 @@ export class WorldMap {
   private _tileInformationsSprite: Sprite;
   private _pathSprite: Sprite;
 
-  private _characters: Map<Hash, Character>;
+  private _characters: Character[];
 
   private _tilesInformations: Map<Hash, Tile>;
   private _currentPath: Map<Hash, Tile>;
@@ -28,7 +28,7 @@ export class WorldMap {
     this._tiles = tiles;
     this._2DTiles = new Map();
     this._hoverTile = undefined;
-    this._characters = new Map();
+    this._characters = [];
     this._tilesInformations = new Map<Hash, Tile>;
     this._tileInformationsSprite = tileInformationsSprite;
     this._currentPath = new Map<Hash, Tile>;
@@ -80,13 +80,10 @@ export class WorldMap {
   }
 
   public set characters(characters: Character[]) {
-    this._characters = new Map();
-    for(const character of characters) {
-      this._characters.set(character.pos.hash(), character);
-    }
+    this._characters = characters;
   }
 
-  public get characters(): Map<Hash, Character> {
+  public get characters(): Character[] {
     return this._characters;
   }
 
