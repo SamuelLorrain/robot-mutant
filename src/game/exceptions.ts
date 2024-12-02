@@ -22,3 +22,10 @@ export class CharacterException extends GameException {
     this.name = "CharacterException";
   }
 }
+
+export class GameStateException extends GameException {
+  constructor(msg: string) {
+    super(msg);
+    this.name = "GameStateException";
+  }
+}
