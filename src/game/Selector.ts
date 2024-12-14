@@ -2,35 +2,11 @@ import { Vec2D } from "@/common/Vec2D";
 import Mouse from "@/ui/Mouse";
 import Context2DProvider from "@/ui/Context2DProvider";
 import { DrawnTile, Renderer } from "./Renderer";
-import { Vec3D } from "@/common/Vec3D";
 import { Queue } from "@/common/Queue";
 import { GameState } from "./GameState";
 import { WorldMap } from "./WorldMap";
+import { ClickEvent, ClickPixelEvent, ClickTileEvent } from "./events/GameEvent";
 
-export interface ClickEvent {
-  tilePos?: Vec3D;
-  pixel?: Vec2D;
-  kind: string;
-};
-
-export interface ClickTileEvent extends ClickEvent {
-  tilePos: Vec3D;
-  pixel: Vec2D;
-  kind: "ClickTileEvent";
-};
-
-export interface ClickPixelEvent extends ClickEvent {
-  pixel: Vec2D;
-  kind: "ClickPixelEvent";
-};
-
-export const isClickTileEvent = (clickEvent: ClickEvent): clickEvent is ClickTileEvent => {
-  return clickEvent.tilePos instanceof Vec3D;
-}
-
-export const isClickPixelEvent = (clickEvent: ClickEvent): clickEvent is ClickPixelEvent => {
-  return clickEvent.tilePos == null;
-}
 
 export class Selector {
   private _mouse: Mouse;
