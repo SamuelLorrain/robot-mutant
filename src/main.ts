@@ -12,6 +12,8 @@ import { Selector } from "./game/Selector";
 import { Character } from "./game/Character";
 import { Sprite } from "./ui/Sprite";
 import { GameState } from "./game/GameState";
+import { Queue } from "./common/Queue";
+import { GameEvent } from "./game/events/GameEvent";
 
 window.addEventListener('load', async () => {
   new DisplaySystem();
@@ -60,6 +62,7 @@ window.addEventListener('load', async () => {
   const renderer = new Renderer(cursorSprites[2], worldmap);
   const selector = new Selector(renderer);
   const updater = new Updater(selector);
+  const gameEventQueue: Queue<GameEvent> = new Queue();
 
   const redCharacterMap:Map<string, Sprite> = new Map();
   redCharacterMap.set(JSON.stringify(["front", "idle"]), characterSprites[0]);
@@ -72,7 +75,7 @@ window.addEventListener('load', async () => {
   redCharacterMap.set(JSON.stringify(["left", "walking"]), characterSprites[7]);
 
   worldmap.characters = [
-    new Character(new Vec3D(3,3,0), redCharacterMap)
+    new Character(new Vec3D(3,3,0), redCharacterMap, gameEventQueue)
   ]
 
   worldmap.tilesInformations = [];
@@ -81,7 +84,7 @@ window.addEventListener('load', async () => {
   updater.sprites = sprites;
   renderer.worldmap = worldmap;
 
-  const game = new Game(updater, renderer, selector);
+  const game = new Game(updater, renderer, selector, gameEventQueue);
 
   game.init();
   game.gameLoop(gameState, worldmap);
