@@ -21,12 +21,13 @@ export class Updater {
     this._worldmap = worldMap;
   }
 
-  public updateTimeline(db: DOMHighResTimeStamp) {
+  public updateTimeline(dt: DOMHighResTimeStamp) {
     for(const sprite of this._sprites) {
-      sprite.updateTimeline(db);
+      sprite.updateTimeline(dt);
     }
     this._worldmap?.update(
-      this._selector.hoverTile?.tile.pos
+      this._selector.hoverTile?.tile.pos,
+      dt
     );
   }
 
