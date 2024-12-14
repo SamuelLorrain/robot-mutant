@@ -5,6 +5,8 @@ import { Updater } from "./Updater";
 import { Selector } from "./Selector";
 import { WorldMap } from "./WorldMap";
 import { GameState } from "./GameState";
+import { GameEvent } from "./events/GameEvent";
+import { Queue } from "@/common/Queue";
 
 export class Game {
   readonly _renderer: Renderer;
@@ -14,11 +16,13 @@ export class Game {
   private _lastTime : number;
   private _countedFrames : number;
   private _accumulatedDt : number;
+  private _gameEventQueue: Queue<GameEvent>;
 
   constructor(
     updater: Updater,
     renderer: Renderer,
-    selector: Selector
+    selector: Selector,
+    gameEventQueue: Queue<GameEvent>
   ) {
     this._updater = updater;
     this._renderer = renderer;
@@ -29,6 +33,7 @@ export class Game {
     this._lastTime = 0;
     this._countedFrames = 0;
     this._accumulatedDt = 0;
+    this._gameEventQueue = gameEventQueue;
   }
 
   public init() {
@@ -43,6 +48,7 @@ export class Game {
 
     this._selector.updateHoverTile();
     this._selector.handleClickEvents(gameState, worldMap);
+    this._handleEvents(gameState, worldMap);
     this._updater.updateTimeline(this._accumulatedDt)
 
     if (this._accumulatedDt >= TICKS_PER_FRAME) {
@@ -53,5 +59,15 @@ export class Game {
 
     this._countedFrames += 1;
     requestAnimationFrame(() => this.gameLoop(gameState, worldMap));
+  }
+
+  private _handleEvents(gameState: GameState, worldMap: WorldMap) {
+    while(!this._gameEventQueue.empty()) {
+      const event: GameEvent = this._gameEventQueue.dequeue();
+      gameState.handleEvent(
+        event,
+        worldMap
+      )
+    }
   }
 }
