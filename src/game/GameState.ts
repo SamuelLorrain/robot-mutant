@@ -1,14 +1,14 @@
 import { Character } from "./Character";
+import { GameEvent, isClickPixelEvent, isClickTileEvent, isFinishActionEvent } from "./events/GameEvent";
 import { GameStateException } from "./exceptions";
-import { ClickEvent, isClickPixelEvent, isClickTileEvent } from "./Selector";
 import { WorldMap } from "./WorldMap";
 
 export type TurnStep = {
-  handleEvent(event: ClickEvent, worldMap: WorldMap, gameState: GameState): void;
+  handleEvent(event: GameEvent, worldMap: WorldMap, gameState: GameState): void;
 }
 
 const BeginTurn = {
-  handleEvent(event: ClickEvent, worldMap: WorldMap, gameState: GameState) {
+  handleEvent(event: GameEvent, worldMap: WorldMap, gameState: GameState) {
     if (isClickTileEvent(event)) {
       const character = worldMap.characters.find(character => character.pos.eq(event.tilePos));
       if (character == null) {
@@ -23,7 +23,7 @@ const BeginTurn = {
 } satisfies TurnStep;
 
 const CharacterSelected = {
-  handleEvent(event: ClickEvent, worldMap: WorldMap, gameState: GameState) {
+  handleEvent(event: GameEvent, worldMap: WorldMap, gameState: GameState) {
     if (isClickTileEvent(event)) {
       const tileInformation = worldMap.tilesInformations.get(event.tilePos.hash());
       if (tileInformation == null) {
@@ -34,6 +34,7 @@ const CharacterSelected = {
       } else {
         if (gameState.selectedCharacter == null) {
           throw new GameStateException("Character can't be null or undefined when game is in 'CharacterSelected' state.")
+
         }
         gameState.selectedCharacter.startMoving(tileInformation);
         gameState.turnStep = CharacterDoingAction;
@@ -47,8 +48,10 @@ const CharacterSelected = {
 } satisfies TurnStep;
 
 const CharacterDoingAction = {
-  handleEvent(event: ClickEvent, worldMap: WorldMap, gameState: GameState) {
-    // Nothing can happens here
+  handleEvent(event: GameEvent, worldMap: WorldMap, gameState: GameState) {
+    if (isFinishActionEvent(event)) {
+      gameState.turnStep = CharacterSelected;
+    }
   }
 } satisfies TurnStep;
 
@@ -74,7 +77,7 @@ export class GameState {
     return this._selectedCharacter;
   }
 
-  public handleEvent(event: ClickEvent, worldMap: WorldMap) {
+  public handleEvent(event: GameEvent, worldMap: WorldMap) {
     this._turnStep.handleEvent(event, worldMap, this);
   }
 }
