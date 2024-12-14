@@ -46,7 +46,8 @@ export class WorldMap {
     return this._pathSprite;
   }
 
-  public update(hoverTilePosition: Vec3D|undefined) {
+  public update(hoverTilePosition: Vec3D|undefined, dt: DOMHighResTimeStamp) {
+    this.updateCharacters(dt);
     if (hoverTilePosition == null) {
       this._hoverTile = undefined;
       return;
@@ -61,6 +62,12 @@ export class WorldMap {
       new Vec2D(hoverTile.pos.x, hoverTile.pos.y).hash()
     )
     this._hoverTile = hoverTile2D;
+  }
+
+  private updateCharacters(dt: DOMHighResTimeStamp) {
+    for (const character of this._characters) {
+      character.update(dt);
+    }
   }
 
   public get hoverTile() {
