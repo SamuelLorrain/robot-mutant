@@ -82,4 +82,17 @@ export class Vec3D {
       f(this.z)
     );
   }
+
+  public length(): number {
+    return Math.sqrt(this.x*this.x + this.y*this.y + this.z*this.z);
+  }
+
+  public normalize(): Vec3D {
+    const length = this.length();
+    return new Vec3D(
+      this.x / length,
+      this.y / length,
+      this.z / length
+    );
+  }
 }
