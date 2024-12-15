@@ -1,7 +1,10 @@
+import { Vec2D } from "@/common/Vec2D";
 import { Character } from "./Character";
-import { GameEvent, isClickPixelEvent, isClickTileEvent, isFinishActionEvent } from "./events/GameEvent";
+import { GameEvent, isClickPixelEvent, isClickTileEvent, isFinishActionEvent, isHoverEvent } from "./events/GameEvent";
 import { GameStateException } from "./exceptions";
+import { tiles3DToGraph2D } from "./TilesToGraph";
 import { WorldMap } from "./WorldMap";
+import { Vec3D } from "@/common/Vec3D";
 
 export type TurnStep = {
   handleEvent(event: GameEvent, worldMap: WorldMap, gameState: GameState): void;
@@ -31,18 +34,28 @@ const CharacterSelected = {
         gameState.selectedCharacter = undefined;
         gameState.turnStep = BeginTurn;
         return;
-      } else {
-        if (gameState.selectedCharacter == null) {
-          throw new GameStateException("Character can't be null or undefined when game is in 'CharacterSelected' state.")
-
-        }
-        gameState.selectedCharacter.startMoving(tileInformation);
-        gameState.turnStep = CharacterDoingAction;
       }
+      if (gameState.selectedCharacter == null) {
+        throw new GameStateException("Character can't be null or undefined when game is in 'CharacterSelected' state.")
+      }
+      const graph = tiles3DToGraph2D(worldMap.tilesInformations);
+      if (!graph.has(new Vec2D(event.tilePos.x, event.tilePos.y).hash())) {
+        return;
+      }
+      const characterPos = new Vec2D(gameState.selectedCharacter.pos.x, gameState.selectedCharacter.pos.y);
+      const path = graph.getPath(characterPos, new Vec2D(event?.tilePos.x, event.tilePos.y));
+      const path3D: Vec3D[] = path.map(vec => worldMap.tiles2D.get(vec.hash())!.pos)
+      gameState.selectedCharacter.startMoving(path3D);
+      gameState.turnStep = CharacterDoingAction;
+
     } else if (isClickPixelEvent(event)) {
       worldMap.tilesInformations = [];
       gameState.selectedCharacter = undefined;
       gameState.turnStep = BeginTurn;
+    } if (isHoverEvent(event)) {
+      if (event.tilePos == null || gameState.selectedCharacter == null) {
+        return;
+      }
     }
   }
 } satisfies TurnStep;
