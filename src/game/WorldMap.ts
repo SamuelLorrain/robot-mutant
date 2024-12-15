@@ -5,7 +5,6 @@ import { Vec2D } from "@/common/Vec2D";
 import { Character } from "./Character";
 import { Sprite } from "@/ui/Sprite";
 import { Graph } from "@/common/Graph";
-import { tiles2DToGraph } from "./TilesToGraph";
 
 export class WorldMap {
   private _tiles: Map<Hash, Tile>;
@@ -35,7 +34,6 @@ export class WorldMap {
     this._pathSprite = pathSprite;
     this._graph = undefined;
     this._update2DTiles();
-    this._updateGraph();
   }
 
   public get tileInformationsSprite() {
@@ -129,10 +127,6 @@ export class WorldMap {
       }
       this._2DTiles.set(vec2D.hash(), tile);
     }
-  }
-
-  private _updateGraph() {
-    this._graph = tiles2DToGraph(this.tile2D);
   }
 
   public computeTilesInformations(origin: Vec3D, range: number) {
