@@ -1,7 +1,5 @@
-import { GraphException } from "./exceptions";
 import { Hash } from "./Hash";
 import { PriorityQueueHash } from "./PriorityQueue";
-import { Queue } from "./Queue";
 import { Vec2D } from "./Vec2D";
 
 export class Graph {
@@ -11,114 +9,61 @@ export class Graph {
     this._edges = map;
   }
 
-  public cost(from_node: Hash, to_node: Hash): number {
-    return 1;
-  }
-
   public neighbors(location: Hash): Hash[] {
     const neighbors = this._edges.get(location);
     if (neighbors == null) {
-      return []
+      return [];
     }
     return neighbors;
   }
 
-  public bfs(start: Hash, goal: Hash) {
-    const frontier = new Queue<Hash>();
-    frontier.enqueue(start);
-    const came_from = new Map<Hash, Hash|undefined>();
-    came_from.set(start, undefined);
-
-    while (!frontier.empty()) {
-      const current = frontier.dequeue();
-      if (current == goal) {
-        break;
-      }
-      for (let next of this.neighbors(current)) {
-        if (!came_from.has(next)) {
-          frontier.enqueue(next);
-          came_from.set(next, current);
-        }
-      }
-    }
-    return came_from;
+  public distance(begin: Hash, end: Hash): number {
+    const v1 = Vec2D.unhash(begin);
+    const v2 = Vec2D.unhash(end);
+    const x = Math.abs(v2.x - v1.x) + Math.abs(v2.y - v1.y);
+    return x;
   }
 
-  public djikstra(start: Hash, goal: Hash): Hash[] {
-    const frontier = new PriorityQueueHash();
-    frontier.enqueue(start, 0);
-    const came_from = new Map<Hash, Hash|undefined>();
-    const cost_so_far = new Map<Hash, number>();
-    came_from.set(start, undefined);
-    cost_so_far.set(start, 0);
-
-    while (!frontier.empty()) {
-      const current = frontier.dequeue();
-      if (current[0] == goal) {
-        break;
-      }
-
-      for (let next of this.neighbors(current[0])) {
-        const new_cost = (cost_so_far.get(current[0]) as number)  + this.cost(current[0], next);
-        if (new_cost < (cost_so_far.get(next) ?? Infinity)) {
-          cost_so_far.set(next, new_cost);
-          const priority = new_cost
-          frontier.enqueue(next, priority);
-          came_from.set(next, current[0]);
-        }
-      }
-    }
-    return this._reconstruct_path(came_from, start, goal);
-  }
-
-  public floodFill(start: Hash, n: number, lockedPos: Set<Hash> = new Set()): Set<Hash> {
-    const set: Set<Hash> = new Set();
-    const queue: Queue<Hash> = new Queue();
-    queue.enqueue(start);
-    let total = (((Math.pow(n, 2)+n)/2)*4)+1;
-    while (!queue.empty() && set.size < total) {
-      const current = queue.dequeue();
-      if (!set.has(current)) {
-        if (lockedPos.has(current)) {
-          total -= 1;
-          continue;
-        }
-        const distance = Math.abs(Vec2D.unhash(current).distance(Vec2D.unhash(start)));
-        if (distance > n) {
-          total -= 1;
-          continue;
-        }
-        set.add(current);
-        const vec = Vec2D.unhash(current);
-        const north = vec.add(new Vec2D(0,-1));
-        const south = vec.add(new Vec2D(0,1));
-        const east = vec.add(new Vec2D(1,0));
-        const west = vec.add(new Vec2D(-1,0));
-        queue.enqueue(north.hash());
-        queue.enqueue(south.hash());
-        queue.enqueue(east.hash());
-        queue.enqueue(west.hash());
-      }
-    }
-    return set;
-  }
-
-  private _reconstruct_path(came_from: Map<Hash, Hash|undefined>, start: Hash, goal: Hash): Hash[] {
-    let current: Hash = goal;
-    const path: Hash[] = [];
-    if (!came_from.has(goal)) {
-      return [];
-    }
-    while (current != start) {
+  public getPath(begin: Vec2D, end: Vec2D) {
+    const prev = this._dijkstra(begin);
+    const path = [];
+    let current: Hash|undefined = end.hash();
+    while (current && prev.get(current)) {
       path.push(current);
-      const new_current = came_from.get(current);
-      if (new_current == null) {
-        throw new GraphException("Unable to construct path");
-      }
-      current = new_current;
+      current = prev.get(current);
     }
-    // path.push(start);
     return path.reverse();
+  }
+
+  private _dijkstra(begin: Vec2D): Map<Hash, Hash|undefined> {
+    const queue = new PriorityQueueHash();
+    const dist: Map<Hash, number> = new Map()
+    const prev: Map<Hash, Hash|undefined> = new Map()
+    const beginHash = begin.hash();
+    dist.set(beginHash, 0);
+    queue.enqueue(beginHash, 0);
+
+    for (const k of this._edges.keys()) {
+      if (k == beginHash) {
+        continue;
+      }
+      prev.set(k, undefined);
+      dist.set(k, Infinity);
+    }
+
+    while (!queue.empty()) {
+      const [current,_] = queue.dequeue();
+      for(const neighbor of this.neighbors(current)) {
+        const alt = (dist.get(current) ?? 0) + this.distance(current, neighbor);
+        if (alt < (dist.get(neighbor) ?? Infinity)) {
+          prev.set(neighbor, current);
+          dist.set(neighbor, alt);
+          queue.enqueue(neighbor, alt);
+        }
+      }
+    }
+
+    return prev;
   }
 }
 
