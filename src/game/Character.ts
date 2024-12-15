@@ -62,14 +62,31 @@ export class Character {
     if (this._target == null) {
       throw new CharacterException("Unable to walk with an empty target");
     }
-    if (this._target.eq(this._pos)) {
-      this._action = "idle";
-      this._target = undefined;
-      this._gameEventQueue.enqueue({
-        kind: "FinishActionEvent"
-      } satisfies FinishActionEvent)
+    if (this._target.almostEq(this._pos, 0.01)) {
+      this._pos.set(this._target);
+      this._finishWalk();
       return;
     }
-    this.pos.set(this._target);
+    const diff = this._target.sub(this.pos);
+    if (diff.x > 0) {
+      this._pos.x += CHARACTER_SPEED;
+    } else if (diff.x < 0) {
+      this._pos.x -= CHARACTER_SPEED;
+    } else if (diff.y > 0) {
+      this._pos.y += CHARACTER_SPEED;
+    } else if (diff.y < 0) {
+      this._pos.y -= CHARACTER_SPEED;
+    } else {
+      throw new CharacterException("Invalid movement");
+    }
+    this._pos.z += diff.z;
+  }
+
+  private _finishWalk() {
+    this._action = "idle";
+    this._target = undefined;
+    this._gameEventQueue.enqueue({
+      kind: "FinishActionEvent"
+    } satisfies FinishActionEvent)
   }
 }
