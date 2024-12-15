@@ -5,7 +5,7 @@ import { Vec2D } from "@/common/Vec2D";
 import { Character } from "./Character";
 import { Sprite } from "@/ui/Sprite";
 import { Graph } from "@/common/Graph";
-import { tiles2DToGraph } from "./WorldMapToGraph";
+import { tiles2DToGraph } from "./TilesToGraph";
 
 export class WorldMap {
   private _tiles: Map<Hash, Tile>;
