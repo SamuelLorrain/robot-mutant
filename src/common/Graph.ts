@@ -9,6 +9,10 @@ export class Graph {
     this._edges = map;
   }
 
+  public has(node: Hash): boolean {
+    return this._edges.get(node) != null;
+  }
+
   public neighbors(location: Hash): Hash[] {
     const neighbors = this._edges.get(location);
     if (neighbors == null) {
