@@ -4,6 +4,7 @@ import { Tile } from "./Tile";
 import { CharacterException } from "./exceptions";
 import { FinishActionEvent, GameEvent } from "./events/GameEvent";
 import { Queue } from "@/common/Queue";
+import { Vec2D } from "@/common/Vec2D";
 
 export type Direction = "front" | "back" | "left" | "right";
 export type Action = "idle" | "begin-walk" | "walking" | "attack" | "take-damage";
@@ -17,6 +18,7 @@ export class Character {
   private _action: Action;
   private _target?: Vec3D;
   private _gameEventQueue: Queue<GameEvent>
+  private _path: Vec3D[];
 
   constructor(
     pos: Vec3D,
@@ -28,6 +30,7 @@ export class Character {
     this._direction = "front";
     this._action = "idle";
     this._target = undefined;
+    this._path = [];
     this._gameEventQueue = gameEventQueue;
   }
   public get pos() {
@@ -47,9 +50,10 @@ export class Character {
     )
   }
 
-  public startMoving(target: Tile) {
+  public startMoving(path: Vec3D[]) {
     this._action = "walking";
-    this._target = target.pos;
+    this._path = path;
+    this._target = path.shift();
   }
 
   public update(dt: DOMHighResTimeStamp) {
@@ -64,8 +68,14 @@ export class Character {
     }
     if (this._target.almostEq(this._pos, 0.01)) {
       this._pos.set(this._target);
-      this._finishWalk();
-      return;
+      if (this._path.length == 0) {
+        this._finishWalk();
+        return;
+      }
+      this._target = this._path.shift();
+      if (this._target == null) {
+        return;
+      }
     }
     const diff = this._target.sub(this.pos);
     if (diff.x > 0) {
