@@ -4,7 +4,6 @@ import { Tile } from "./Tile";
 import { CharacterException } from "./exceptions";
 import { FinishActionEvent, GameEvent } from "./events/GameEvent";
 import { Queue } from "@/common/Queue";
-import { Vec2D } from "@/common/Vec2D";
 
 export type Direction = "front" | "back" | "left" | "right";
 export type Action = "idle" | "begin-walk" | "walking" | "attack" | "take-damage";
@@ -79,12 +78,16 @@ export class Character {
     }
     const diff = this._target.sub(this.pos);
     if (diff.x > 0) {
+      this._direction = "right";
       this._pos.x += CHARACTER_SPEED;
     } else if (diff.x < 0) {
+      this._direction = "left";
       this._pos.x -= CHARACTER_SPEED;
     } else if (diff.y > 0) {
+      this._direction = "front";
       this._pos.y += CHARACTER_SPEED;
     } else if (diff.y < 0) {
+      this._direction = "back";
       this._pos.y -= CHARACTER_SPEED;
     } else {
       throw new CharacterException("Invalid movement");
