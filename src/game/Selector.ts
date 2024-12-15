@@ -5,7 +5,8 @@ import { DrawnTile, Renderer } from "./Renderer";
 import { Queue } from "@/common/Queue";
 import { GameState } from "./GameState";
 import { WorldMap } from "./WorldMap";
-import { ClickEvent, ClickPixelEvent, ClickTileEvent } from "./events/GameEvent";
+import { ClickEvent, ClickPixelEvent, ClickTileEvent, HoverEvent } from "./events/GameEvent";
+import { Vec3D } from "@/common/Vec3D";
 
 
 export class Selector {
@@ -54,6 +55,18 @@ export class Selector {
         this._clickEventQueue.enqueue(event);
       }
     });
+  }
+
+  private triggerHoverEvent() {
+    if (this._hoverTile == null) {
+      return;
+    }
+    const event = {
+      tilePos: new Vec3D(this._hoverTile.tile.pos),
+      pixel: new Vec2D(this._hoverTile.drawPos),
+      kind: "HoverEvent"
+    } satisfies HoverEvent;
+    this._clickEventQueue.enqueue(event);
   }
 
   public get hoverTile() {
@@ -130,6 +143,14 @@ export class Selector {
       }
     }
 
+    if (this._hoverTile === secondPassHoverTiles[0]) {
+      return;
+    }
+
     this._hoverTile = secondPassHoverTiles[0];
+
+    if (!this._hoverTile != null) {
+      this.triggerHoverEvent();
+    }
   }
 }
