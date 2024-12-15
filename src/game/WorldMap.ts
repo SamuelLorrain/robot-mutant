@@ -80,7 +80,7 @@ export class WorldMap {
     return this.tiles.get(pos.hash());
   }
 
-  public get tile2D() {
+  public get tiles2D() {
     return this._2DTiles;
   }
 
