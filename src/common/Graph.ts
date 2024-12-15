@@ -36,7 +36,7 @@ export class Graph {
       path.push(current);
       current = prev.get(current);
     }
-    return path.reverse();
+    return path.map(Vec2D.unhash).reverse();
   }
 
   private _dijkstra(begin: Vec2D): Map<Hash, Hash|undefined> {
