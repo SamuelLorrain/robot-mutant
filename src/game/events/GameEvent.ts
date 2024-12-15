@@ -26,12 +26,22 @@ export interface ClickPixelEvent extends ClickEvent {
   kind: "ClickPixelEvent";
 };
 
+export interface HoverEvent extends ClickEvent {
+  tilePos: Vec3D;
+  pixel: Vec2D;
+  kind: "HoverEvent";
+};
+
 export const isClickTileEvent = (gameEvent: ClickEvent): gameEvent is ClickTileEvent => {
   return gameEvent.kind == "ClickTileEvent";
 }
 
 export const isClickPixelEvent = (gameEvent: ClickEvent): gameEvent is ClickPixelEvent => {
   return gameEvent.kind == "ClickPixelEvent";
+}
+
+export const isHoverEvent = (gameEvent: GameEvent): gameEvent is ClickEvent => {
+  return gameEvent.kind == "HoverEvent";
 }
 
 export const isFinishActionEvent = (gameEvent: GameEvent): gameEvent is FinishActionEvent => {
