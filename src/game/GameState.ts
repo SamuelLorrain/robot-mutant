@@ -63,6 +63,11 @@ const CharacterSelected = {
 const CharacterDoingAction = {
   handleEvent(event: GameEvent, worldMap: WorldMap, gameState: GameState) {
     if (isFinishActionEvent(event)) {
+      const character = gameState.selectedCharacter;
+      if (character == null) {
+        throw new GameStateException("A character should be selected while doing action");
+      }
+      worldMap.computeTilesInformations(character.pos, 2);
       gameState.turnStep = CharacterSelected;
     }
   }
