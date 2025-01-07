@@ -18,11 +18,14 @@ export class Character {
   private _target?: Vec3D;
   private _gameEventQueue: Queue<GameEvent>
   private _path: Vec3D[];
+  private _movePerTurn: number;
+  private _currentMoveAvailable: number;
 
   constructor(
     pos: Vec3D,
     spriteMap: Map<string, Sprite>,
-    gameEventQueue: Queue<GameEvent>
+    gameEventQueue: Queue<GameEvent>,
+    movePerTurn: number
   ) {
     this._pos = new Vec3D(pos);
     this._spriteMap = spriteMap;
@@ -31,7 +34,10 @@ export class Character {
     this._target = undefined;
     this._path = [];
     this._gameEventQueue = gameEventQueue;
+    this._movePerTurn = movePerTurn;
+    this._currentMoveAvailable = movePerTurn;
   }
+
   public get pos() {
     return this._pos;
   }
@@ -47,6 +53,14 @@ export class Character {
       new Vec3D(this._pos),
       sprite
     )
+  }
+
+  public get movePerTurn() {
+    return this._movePerTurn;
+  }
+
+  public get currentMoveAvailable() {
+    return this._currentMoveAvailable;
   }
 
   public startMoving(path: Vec3D[]) {
@@ -80,15 +94,19 @@ export class Character {
     if (diff.x > 0) {
       this._direction = "right";
       this._pos.x += CHARACTER_SPEED;
+      this._currentMoveAvailable -= 1;
     } else if (diff.x < 0) {
       this._direction = "left";
       this._pos.x -= CHARACTER_SPEED;
+      this._currentMoveAvailable -= 1;
     } else if (diff.y > 0) {
       this._direction = "front";
       this._pos.y += CHARACTER_SPEED;
+      this._currentMoveAvailable -= 1;
     } else if (diff.y < 0) {
       this._direction = "back";
       this._pos.y -= CHARACTER_SPEED;
+      this._currentMoveAvailable -= 1;
     } else {
       throw new CharacterException("Invalid movement");
     }

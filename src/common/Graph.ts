@@ -32,7 +32,7 @@ export class Graph {
     const prev = this._dijkstra(begin);
     const path = [];
     let current: Hash|undefined = end.hash();
-    while (current && prev.get(current)) {
+    while (current && (prev.get(current) || current == begin.hash())) {
       path.push(current);
       current = prev.get(current);
     }
