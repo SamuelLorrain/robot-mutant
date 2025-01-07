@@ -4,7 +4,7 @@ import { GameEvent, isClickPixelEvent, isClickTileEvent, isFinishActionEvent, is
 import { GameStateException } from "./exceptions";
 import { tiles3DToGraph2D } from "./TilesToGraph";
 import { WorldMap } from "./WorldMap";
-import { Vec3D } from "@/common/Vec3D";
+import { Tile } from "./Tile";
 
 export type TurnStep = {
   handleEvent(event: GameEvent, worldMap: WorldMap, gameState: GameState): void;
@@ -18,7 +18,7 @@ const BeginTurn = {
         worldMap.tilesInformations = [];
         return;
       }
-      worldMap.computeTilesInformations(character.pos, 2);
+      worldMap.computeTilesInformations(character.pos, character.currentMoveAvailable);
       gameState.selectedCharacter = character;
       gameState.turnStep = CharacterSelected;
     }
@@ -38,14 +38,11 @@ const CharacterSelected = {
       if (gameState.selectedCharacter == null) {
         throw new GameStateException("Character can't be null or undefined when game is in 'CharacterSelected' state.")
       }
-      const graph = tiles3DToGraph2D(worldMap.tilesInformations);
-      if (!graph.has(new Vec2D(event.tilePos.x, event.tilePos.y).hash())) {
+      if (worldMap.currentPathArray.length === 0) {
         return;
       }
-      const characterPos = new Vec2D(gameState.selectedCharacter.pos.x, gameState.selectedCharacter.pos.y);
-      const path = graph.getPath(characterPos, new Vec2D(event?.tilePos.x, event.tilePos.y));
-      const path3D: Vec3D[] = path.map(vec => worldMap.tiles2D.get(vec.hash())!.pos)
-      gameState.selectedCharacter.startMoving(path3D);
+      const path = worldMap.currentPathArray.map(tile => tile.pos);
+      gameState.selectedCharacter.startMoving(path);
       gameState.turnStep = CharacterDoingAction;
 
     } else if (isClickPixelEvent(event)) {
@@ -54,8 +51,22 @@ const CharacterSelected = {
       gameState.turnStep = BeginTurn;
     } if (isHoverEvent(event)) {
       if (event.tilePos == null || gameState.selectedCharacter == null) {
+        worldMap.currentPath = [];
         return;
       }
+      const graph = tiles3DToGraph2D(worldMap.tilesInformations);
+      if (!graph.has(new Vec2D(event.tilePos.x, event.tilePos.y).hash())) {
+        worldMap.currentPath = [];
+        return;
+      }
+      const characterPos = new Vec2D(gameState.selectedCharacter.pos.x, gameState.selectedCharacter.pos.y);
+      const path = graph.getPath(characterPos, new Vec2D(event?.tilePos.x, event.tilePos.y));
+      if (path.length === 0) {
+        worldMap.currentPath = [];
+        return;
+      }
+      const path3D: Tile[] = path.map(vec => worldMap.tiles2D.get(vec.hash())!)
+      worldMap.currentPath = path3D;
     }
   }
 } satisfies TurnStep;
@@ -67,12 +78,12 @@ const CharacterDoingAction = {
       if (character == null) {
         throw new GameStateException("A character should be selected while doing action");
       }
-      worldMap.computeTilesInformations(character.pos, 2);
+      worldMap.computeTilesInformations(character.pos, character.currentMoveAvailable);
+      worldMap.currentPath = [];
       gameState.turnStep = CharacterSelected;
     }
   }
 } satisfies TurnStep;
-
 
 export class GameState {
   private _selectedCharacter?: Character;

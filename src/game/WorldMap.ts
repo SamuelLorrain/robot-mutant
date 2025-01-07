@@ -17,6 +17,7 @@ export class WorldMap {
 
   private _tilesInformations: Map<Hash, Tile>;
   private _currentPath: Map<Hash, Tile>;
+  private _currentPathArray: Tile[];
   private _graph?: Graph;
 
   constructor(
@@ -31,6 +32,7 @@ export class WorldMap {
     this._tilesInformations = new Map<Hash, Tile>;
     this._tileInformationsSprite = tileInformationsSprite;
     this._currentPath = new Map<Hash, Tile>;
+    this._currentPathArray = [];
     this._pathSprite = pathSprite;
     this._graph = undefined;
     this._update2DTiles();
@@ -104,14 +106,23 @@ export class WorldMap {
   }
 
   public set currentPath(currentPath: Tile[]) {
+    this._currentPathArray = [...currentPath];
     this._currentPath = new Map();
     for(const tile of currentPath) {
-      this._currentPath.set(tile.pos.hash(), tile);
+      const pathTile = new Tile(
+        tile.pos,
+        this._pathSprite
+      )
+      this._currentPath.set(pathTile.pos.hash(), pathTile);
     }
   }
 
   public get currentPath(): Map<Hash, Tile> {
     return this._currentPath;
+  }
+
+  public get currentPathArray(): Tile[] {
+    return this._currentPathArray;
   }
 
   public get graph() {

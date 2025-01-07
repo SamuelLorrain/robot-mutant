@@ -58,7 +58,7 @@ window.addEventListener('load', async () => {
     }
   }
 
-  const worldmap = new WorldMap(tiles, cursorSprites[6], cursorSprites[7]);
+  const worldmap = new WorldMap(tiles, cursorSprites[6], cursorSprites[6]);
   const renderer = new Renderer(cursorSprites[2], worldmap);
   const selector = new Selector(renderer);
   const updater = new Updater(selector);
@@ -75,7 +75,7 @@ window.addEventListener('load', async () => {
   redCharacterMap.set(JSON.stringify(["left", "walking"]), characterSprites[7]);
 
   worldmap.characters = [
-    new Character(new Vec3D(3,3,0), redCharacterMap, gameEventQueue)
+    new Character(new Vec3D(3,3,0), redCharacterMap, gameEventQueue, 3)
   ]
 
   worldmap.tilesInformations = [];
