@@ -63,6 +63,14 @@ export class Character {
     return this._currentMoveAvailable;
   }
 
+  public set currentMoveAvailable(movesAvailable: number) {
+    if (movesAvailable < 0) {
+      this._currentMoveAvailable = 0;
+      return;
+    }
+    this._currentMoveAvailable = movesAvailable;
+  }
+
   public startMoving(path: Vec3D[]) {
     this._action = "walking";
     this._path = path;
@@ -94,19 +102,15 @@ export class Character {
     if (diff.x > 0) {
       this._direction = "right";
       this._pos.x += CHARACTER_SPEED;
-      this._currentMoveAvailable -= 1;
     } else if (diff.x < 0) {
       this._direction = "left";
       this._pos.x -= CHARACTER_SPEED;
-      this._currentMoveAvailable -= 1;
     } else if (diff.y > 0) {
       this._direction = "front";
       this._pos.y += CHARACTER_SPEED;
-      this._currentMoveAvailable -= 1;
     } else if (diff.y < 0) {
       this._direction = "back";
       this._pos.y -= CHARACTER_SPEED;
-      this._currentMoveAvailable -= 1;
     } else {
       throw new CharacterException("Invalid movement");
     }

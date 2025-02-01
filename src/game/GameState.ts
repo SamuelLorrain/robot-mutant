@@ -43,6 +43,7 @@ const CharacterSelected = {
       }
       const path = worldMap.currentPathArray.map(tile => tile.pos);
       gameState.selectedCharacter.startMoving(path);
+      gameState.selectedCharacter.currentMoveAvailable -= path.length;
       gameState.turnStep = CharacterDoingAction;
 
     } else if (isClickPixelEvent(event)) {
