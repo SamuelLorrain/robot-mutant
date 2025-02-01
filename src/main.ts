@@ -23,8 +23,23 @@ window.addEventListener('load', async () => {
     spriteSheets.get('tiles') as SpriteSheet,
     [0, 1, 2, 3, 4, 5, 6, 8, [{durationMs: 500, spriteNb: 9}, {durationMs: 500, spriteNb: 10}]]
   );
-  const characterSprites = createSprites(
+  const redCharacterSprites = createSprites(
     spriteSheets.get('red') as SpriteSheet,
+    [
+      // idle
+      [{durationMs: 400, spriteNb: 0}, {durationMs: 400, spriteNb: 1}],
+      [{durationMs: 400, spriteNb: 4}, {durationMs: 400, spriteNb: 5}],
+      [{durationMs: 400, spriteNb: 32}, {durationMs: 400, spriteNb: 33}],
+      [{durationMs: 400, spriteNb: 36}, {durationMs: 400, spriteNb: 37}],
+      // walking
+      [{durationMs: 400, spriteNb: 16}, {durationMs: 400, spriteNb: 17}],
+      [{durationMs: 400, spriteNb: 20}, {durationMs: 400, spriteNb: 21}],
+      [{durationMs: 400, spriteNb: 48}, {durationMs: 400, spriteNb: 49}],
+      [{durationMs: 400, spriteNb: 52}, {durationMs: 400, spriteNb: 53}]
+    ]
+  )
+  const blueCharacterSprites = createSprites(
+    spriteSheets.get('blue') as SpriteSheet,
     [
       // idle
       [{durationMs: 400, spriteNb: 0}, {durationMs: 400, spriteNb: 1}],
@@ -45,7 +60,8 @@ window.addEventListener('load', async () => {
   )
 
   const sprites = mapSprites;
-  sprites.push(...characterSprites);
+  sprites.push(...redCharacterSprites);
+  sprites.push(...blueCharacterSprites);
   sprites.push(...cursorSprites);
 
   const gameState = new GameState();
@@ -65,17 +81,28 @@ window.addEventListener('load', async () => {
   const gameEventQueue: Queue<GameEvent> = new Queue();
 
   const redCharacterMap:Map<string, Sprite> = new Map();
-  redCharacterMap.set(JSON.stringify(["front", "idle"]), characterSprites[0]);
-  redCharacterMap.set(JSON.stringify(["back", "idle"]), characterSprites[1]);
-  redCharacterMap.set(JSON.stringify(["right", "idle"]), characterSprites[2]);
-  redCharacterMap.set(JSON.stringify(["left", "idle"]), characterSprites[3]);
-  redCharacterMap.set(JSON.stringify(["front", "walking"]), characterSprites[4]);
-  redCharacterMap.set(JSON.stringify(["back", "walking"]), characterSprites[5]);
-  redCharacterMap.set(JSON.stringify(["right", "walking"]), characterSprites[6]);
-  redCharacterMap.set(JSON.stringify(["left", "walking"]), characterSprites[7]);
+  redCharacterMap.set(JSON.stringify(["front", "idle"]), redCharacterSprites[0]);
+  redCharacterMap.set(JSON.stringify(["back", "idle"]), redCharacterSprites[1]);
+  redCharacterMap.set(JSON.stringify(["right", "idle"]), redCharacterSprites[2]);
+  redCharacterMap.set(JSON.stringify(["left", "idle"]), redCharacterSprites[3]);
+  redCharacterMap.set(JSON.stringify(["front", "walking"]), redCharacterSprites[4]);
+  redCharacterMap.set(JSON.stringify(["back", "walking"]), redCharacterSprites[5]);
+  redCharacterMap.set(JSON.stringify(["right", "walking"]), redCharacterSprites[6]);
+  redCharacterMap.set(JSON.stringify(["left", "walking"]), redCharacterSprites[7]);
+
+  const blueCharacterMap:Map<string, Sprite> = new Map();
+  blueCharacterMap.set(JSON.stringify(["front", "idle"]), blueCharacterSprites[0]);
+  blueCharacterMap.set(JSON.stringify(["back", "idle"]), blueCharacterSprites[1]);
+  blueCharacterMap.set(JSON.stringify(["right", "idle"]), blueCharacterSprites[2]);
+  blueCharacterMap.set(JSON.stringify(["left", "idle"]), blueCharacterSprites[3]);
+  blueCharacterMap.set(JSON.stringify(["front", "walking"]), blueCharacterSprites[4]);
+  blueCharacterMap.set(JSON.stringify(["back", "walking"]), blueCharacterSprites[5]);
+  blueCharacterMap.set(JSON.stringify(["right", "walking"]), blueCharacterSprites[6]);
+  blueCharacterMap.set(JSON.stringify(["left", "walking"]), blueCharacterSprites[7]);
 
   worldmap.characters = [
-    new Character(new Vec3D(3,3,0), redCharacterMap, gameEventQueue, 3)
+    new Character(new Vec3D(5,3,0), blueCharacterMap, gameEventQueue, 3),
+    new Character(new Vec3D(3,3,0), redCharacterMap, gameEventQueue, 3),
   ]
 
   worldmap.tilesInformations = [];

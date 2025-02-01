@@ -14,27 +14,27 @@ export const loadSpritesheet = async (): Promise<Map<string, SpriteSheet>> => {
     await Picture.createFromUri(tiles),
     new Vec2D(64,64),
     new Vec2D(4,4)
-  )
+  );
   map.set('tiles', tileSpriteSheet);
 
   const cursorSpriteSheet = new SpriteSheet(
     await Picture.createFromUri(cursors),
     new Vec2D(64,64),
     new Vec2D(4,4)
-  )
+  );
   map.set('cursor', cursorSpriteSheet);
 
   const blueCharacterSpriteSheet = new SpriteSheet(
     await Picture.createFromUri(blueCharacter),
     new Vec2D(64,64),
     new Vec2D(8,8)
-  )
+  );
   map.set('blue', blueCharacterSpriteSheet);
   const redCharacterSpriteSheet = new SpriteSheet(
     await Picture.createFromUri(redCharacter),
     new Vec2D(64,64),
     new Vec2D(8,8)
-  )
+  );
   map.set('red', redCharacterSpriteSheet);
 
   return map;
@@ -43,12 +43,10 @@ export const loadSpritesheet = async (): Promise<Map<string, SpriteSheet>> => {
 export const createSprites = (
   spriteSheet: SpriteSheet,
   spritesDescription: Array<number|SpriteTimelineFrame[]>
-) => {
-  return spritesDescription.map(description => {
+) => spritesDescription.map(description => {
     if (typeof description === 'number') {
       return new Sprite(spriteSheet, [createSingleFrameTimeline(description)]);
     } else {
       return new Sprite(spriteSheet, description);
     }
-  })
-}
+});
