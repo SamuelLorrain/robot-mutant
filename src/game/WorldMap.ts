@@ -4,7 +4,6 @@ import { Tile } from "@/game/Tile";
 import { Vec2D } from "@/common/Vec2D";
 import { Character } from "./Character";
 import { Sprite } from "@/ui/Sprite";
-import { Graph } from "@/common/Graph";
 
 export class WorldMap {
   private _tiles: Map<Hash, Tile>;
@@ -18,7 +17,6 @@ export class WorldMap {
   private _tilesInformations: Map<Hash, Tile>;
   private _currentPath: Map<Hash, Tile>;
   private _currentPathArray: Tile[];
-  private _graph?: Graph;
 
   constructor(
     tiles: Map<Hash, Tile>,
@@ -34,7 +32,6 @@ export class WorldMap {
     this._currentPath = new Map<Hash, Tile>;
     this._currentPathArray = [];
     this._pathSprite = pathSprite;
-    this._graph = undefined;
     this._update2DTiles();
   }
 
@@ -123,10 +120,6 @@ export class WorldMap {
 
   public get currentPathArray(): Tile[] {
     return this._currentPathArray;
-  }
-
-  public get graph() {
-    return this._graph;
   }
 
   private _update2DTiles() {
