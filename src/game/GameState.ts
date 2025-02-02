@@ -15,7 +15,7 @@ const BeginTurn = {
     if (isClickTileEvent(event)) {
       const character = worldMap.characters.find(character => character.pos.eq(event.tilePos));
       if (character == null) {
-        worldMap.tilesInformations = [];
+        worldMap.tilesInformations = new Map();
         return;
       }
       worldMap.computeTilesInformations(character.pos, character.currentMoveAvailable);
@@ -30,7 +30,7 @@ const CharacterSelected = {
     if (isClickTileEvent(event)) {
       const tileInformation = worldMap.tilesInformations.get(event.tilePos.hash());
       if (tileInformation == null) {
-        worldMap.tilesInformations = [];
+        worldMap.tilesInformations = new Map();
         gameState.selectedCharacter = undefined;
         gameState.turnStep = BeginTurn;
         return;
@@ -47,7 +47,7 @@ const CharacterSelected = {
       gameState.turnStep = CharacterDoingAction;
 
     } else if (isClickPixelEvent(event)) {
-      worldMap.tilesInformations = [];
+      worldMap.tilesInformations = new Map();
       gameState.selectedCharacter = undefined;
       gameState.turnStep = BeginTurn;
     } if (isHoverEvent(event)) {

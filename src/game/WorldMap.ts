@@ -91,11 +91,8 @@ export class WorldMap {
     return this._characters;
   }
 
-  public set tilesInformations(tilesInformations: Tile[]) {
-    this._tilesInformations = new Map();
-    for(const tile of tilesInformations) {
-      this._tilesInformations.set(tile.pos.hash(), tile);
-    }
+  public set tilesInformations(tilesInformations: Map<Hash, Tile>) {
+    this._tilesInformations = tilesInformations;
   }
 
   public get tilesInformations(): Map<Hash, Tile> {
@@ -142,6 +139,9 @@ export class WorldMap {
         currentTilesInformations.push(new Tile(tile.pos, this.tileInformationsSprite))
       }
     }
-    this.tilesInformations = currentTilesInformations;
+    this.tilesInformations = new Map();
+    for (const tile of currentTilesInformations) {
+      this.tilesInformations.set(tile.pos.hash(), tile);
+    }
   }
 }

@@ -105,7 +105,7 @@ window.addEventListener('load', async () => {
     new Character(new Vec3D(3,3,0), redCharacterMap, gameEventQueue, 3),
   ]
 
-  worldmap.tilesInformations = [];
+  worldmap.tilesInformations = new Map();
 
   updater.worldmap = worldmap;
   updater.sprites = sprites;
