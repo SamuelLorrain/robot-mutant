@@ -29,7 +29,7 @@ export class Graph {
   }
 
   public getPath(begin: Vec2D, end: Vec2D) {
-    const prev = this._dijkstra(begin);
+    const prev = this.dijkstra(begin);
     const path = [];
     let current: Hash|undefined = end.hash();
     while (current && (prev.get(current) || current == begin.hash())) {
@@ -39,7 +39,8 @@ export class Graph {
     return path.map(Vec2D.unhash).reverse();
   }
 
-  private _dijkstra(begin: Vec2D): Map<Hash, Hash|undefined> {
+  public dijkstra(begin: Vec2D, obstacles_: Set<Hash>|null = null): Map<Hash, Hash|undefined> {
+    const obstacles = obstacles_ ?? new Set();
     const queue = new PriorityQueueHash();
     const dist: Map<Hash, number> = new Map()
     const prev: Map<Hash, Hash|undefined> = new Map()
@@ -58,7 +59,12 @@ export class Graph {
     while (!queue.empty()) {
       const [current,_] = queue.dequeue();
       for(const neighbor of this.neighbors(current)) {
-        const alt = (dist.get(current) ?? 0) + this.distance(current, neighbor);
+        let alt: number;
+        if (obstacles.has(current)) {
+          alt = Infinity;
+        } else {
+          alt = (dist.get(current) ?? 0) + this.distance(current, neighbor);
+        }
         if (alt < (dist.get(neighbor) ?? Infinity)) {
           prev.set(neighbor, current);
           dist.set(neighbor, alt);
@@ -66,7 +72,9 @@ export class Graph {
         }
       }
     }
-
+    for(const o of obstacles) {
+      prev.delete(o);
+    }
     return prev;
   }
 }

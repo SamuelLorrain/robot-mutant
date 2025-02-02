@@ -4,6 +4,8 @@ import { Tile } from "@/game/Tile";
 import { Vec2D } from "@/common/Vec2D";
 import { Character } from "./Character";
 import { Sprite } from "@/ui/Sprite";
+import { range } from "@/common/Math";
+import { tiles3DToGraph2D } from "./TilesToGraph";
 
 export class WorldMap {
   private _tiles: Map<Hash, Tile>;
@@ -144,4 +146,61 @@ export class WorldMap {
       this.tilesInformations.set(tile.pos.hash(), tile);
     }
   }
+
+  public getObstacles2DPositions(): Set<Hash> {
+    const s = new Set<Hash>();
+    for(const c of this.characters) {
+      s.add(new Vec2D(c.pos.x, c.pos.y).hash());
+    }
+    return s;
+  }
+
+  public getCharacterRangeTiles(character_: Character, distance: number) {
+    const character = this.characters.find(x => x.pos.eq(character_.pos))
+    if (character == null) {
+      return [];
+    }
+
+    this.tilesInformations = new Map();
+    const origin = character.pos;
+    for(const i of range(origin.x-distance, origin.x+distance+1)) {
+      for(const j of range(origin.y-distance, origin.y+distance+1)) {
+        const manhattanDistance = Math.abs(i - origin.x) + Math.abs(j - origin.y);
+        if (manhattanDistance > distance) {
+          continue;
+        }
+        const tile = this._2DTiles.get(new Vec2D(i,j).hash());
+        if (tile == null) {
+          continue;
+        }
+        this.tilesInformations.set(
+          tile.pos.hash(),
+          new Tile(tile.pos, this.tileInformationsSprite)
+        );
+      }
+    }
+    const graph = tiles3DToGraph2D(this.tilesInformations);
+    const obstacles = this.getObstacles2DPositions();
+    obstacles.delete(new Vec2D(origin.x, origin.y).hash());
+    const dijkstraed = graph.dijkstra(
+      new Vec2D(origin.x, origin.y),
+      obstacles
+    );
+    const tiles = new Map();
+    for (const [k,v] of dijkstraed.entries()) {
+      if (v != null) {
+        const tile = this._2DTiles.get(k);
+        if (tile == null) {
+          continue;
+        }
+        tiles.set(
+          tile.pos.hash(),
+          new Tile(tile.pos, this.tileInformationsSprite)
+        );
+      }
+    }
+    tiles.set(origin.hash(), new Tile(origin, this.tileInformationsSprite));
+    this.tilesInformations = tiles;
+  }
+
 }

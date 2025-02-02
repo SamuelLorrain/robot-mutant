@@ -18,7 +18,8 @@ const BeginTurn = {
         worldMap.tilesInformations = new Map();
         return;
       }
-      worldMap.computeTilesInformations(character.pos, character.currentMoveAvailable);
+      // worldMap.computeTilesInformations(character.pos, character.currentMoveAvailable);
+      worldMap.getCharacterRangeTiles(character, character.currentMoveAvailable);
       gameState.selectedCharacter = character;
       gameState.turnStep = CharacterSelected;
     }
@@ -79,7 +80,7 @@ const CharacterDoingAction = {
       if (character == null) {
         throw new GameStateException("A character should be selected while doing action");
       }
-      worldMap.computeTilesInformations(character.pos, character.currentMoveAvailable);
+      worldMap.getCharacterRangeTiles(character, character.currentMoveAvailable);
       worldMap.currentPath = [];
       gameState.turnStep = CharacterSelected;
     }
