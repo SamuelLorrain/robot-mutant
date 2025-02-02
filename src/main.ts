@@ -14,6 +14,7 @@ import { Sprite } from "./ui/Sprite";
 import { GameState } from "./game/GameState";
 import { Queue } from "./common/Queue";
 import { GameEvent } from "./game/events/GameEvent";
+import { Team } from "./game/Teams";
 
 window.addEventListener('load', async () => {
   new DisplaySystem();
@@ -64,9 +65,6 @@ window.addEventListener('load', async () => {
   sprites.push(...blueCharacterSprites);
   sprites.push(...cursorSprites);
 
-  const gameState = new GameState();
-
-
   const tiles = new Map();
   for(let i = 0; i < 8; i++) {
     for(let j = 0; j < 8; j++) {
@@ -105,6 +103,11 @@ window.addEventListener('load', async () => {
     new Character(new Vec3D(3,3,0), redCharacterMap, gameEventQueue, 3),
   ]
 
+  const teams = [
+    new Team([worldmap.characters[0]]),
+    new Team([worldmap.characters[1]]),
+  ]
+
   worldmap.tilesInformations = new Map();
 
   updater.worldmap = worldmap;
@@ -112,6 +115,8 @@ window.addEventListener('load', async () => {
   renderer.worldmap = worldmap;
 
   const game = new Game(updater, renderer, selector, gameEventQueue);
+
+  const gameState = new GameState(teams, 0);
 
   game.init();
   game.gameLoop(gameState, worldmap);

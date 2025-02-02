@@ -5,6 +5,7 @@ import { GameStateException } from "./exceptions";
 import { tiles3DToGraph2D } from "./TilesToGraph";
 import { WorldMap } from "./WorldMap";
 import { Tile } from "./Tile";
+import { Team } from "./Teams";
 
 export type TurnStep = {
   handleEvent(event: GameEvent, worldMap: WorldMap, gameState: GameState): void;
@@ -18,7 +19,6 @@ const BeginTurn = {
         worldMap.tilesInformations = new Map();
         return;
       }
-      // worldMap.computeTilesInformations(character.pos, character.currentMoveAvailable);
       worldMap.getCharacterRangeTiles(character, character.currentMoveAvailable);
       gameState.selectedCharacter = character;
       gameState.turnStep = CharacterSelected;
@@ -90,10 +90,29 @@ const CharacterDoingAction = {
 export class GameState {
   private _selectedCharacter?: Character;
   private _turnStep: TurnStep;
+  private _teams: Team[];
+  private _activeTeam: number;
 
-  constructor() {
+  constructor(teams: Team[], activeTeam: number) {
     this._selectedCharacter = undefined;
     this._turnStep = BeginTurn;
+    this._teams = teams;
+    this._activeTeam = activeTeam;
+  }
+
+  public get teams() {
+    return this._teams;
+  }
+
+  public get activeTeam(): Team {
+    return this._teams[this._activeTeam];
+  }
+
+  public set activeTeams(activeTeam: number) {
+    if (activeTeam >= this.teams.length) {
+      throw new GameStateException("activeTeam should be an existing team");
+    }
+    this._activeTeam = activeTeam;
   }
 
   public set turnStep(step: TurnStep) {
