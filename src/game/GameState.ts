@@ -15,7 +15,7 @@ const BeginTurn = {
   handleEvent(event: GameEvent, worldMap: WorldMap, gameState: GameState) {
     if (isClickTileEvent(event)) {
       const character = worldMap.characters.find(character => character.pos.eq(event.tilePos));
-      if (character == null) {
+      if (character == null || !gameState.activeTeam.hasCharacter(character)) {
         worldMap.tilesInformations = new Map();
         return;
       }
