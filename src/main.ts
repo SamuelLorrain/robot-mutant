@@ -15,6 +15,7 @@ import { GameState } from "./game/GameState";
 import { Queue } from "./common/Queue";
 import { GameEvent } from "./game/events/GameEvent";
 import { Team } from "./game/Teams";
+import { TitleScreen } from "./ui/TitleScreen";
 
 window.addEventListener('load', async () => {
   new DisplaySystem();
@@ -99,8 +100,8 @@ window.addEventListener('load', async () => {
   blueCharacterMap.set(JSON.stringify(["left", "walking"]), blueCharacterSprites[7]);
 
   worldmap.characters = [
-    new Character(new Vec3D(5,3,0), blueCharacterMap, gameEventQueue, 3),
     new Character(new Vec3D(3,3,0), redCharacterMap, gameEventQueue, 3),
+    new Character(new Vec3D(5,3,0), blueCharacterMap, gameEventQueue, 3),
   ]
 
   const teams = [
@@ -118,6 +119,13 @@ window.addEventListener('load', async () => {
 
   const gameState = new GameState(teams, 0);
 
-  game.init();
-  game.gameLoop(gameState, worldmap);
+  const titleScreen = new TitleScreen();
+
+  const titleScreenInterval = setInterval(() => {
+    if (titleScreen.started == true) {
+      clearInterval(titleScreenInterval);
+      game.init();
+      game.gameLoop(gameState, worldmap);
+    }
+  }, 250);
 });
