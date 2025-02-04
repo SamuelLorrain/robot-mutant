@@ -83,7 +83,7 @@ export class Character {
     }
   }
 
-  private _doWalk(dt: DOMHighResTimeStamp) {
+  private _doWalk(_: DOMHighResTimeStamp) {
     if (this._target == null) {
       throw new CharacterException("Unable to walk with an empty target");
     }
