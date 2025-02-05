@@ -11,7 +11,7 @@ export type TurnStep = {
   handleEvent(event: GameEvent, worldMap: WorldMap, gameState: GameState): void;
 }
 
-const BeginTurn = {
+export const BeginTurn = {
   handleEvent(event: GameEvent, worldMap: WorldMap, gameState: GameState) {
     if (isClickTileEvent(event)) {
       const character = worldMap.characters.find(character => character.pos.eq(event.tilePos));
@@ -117,6 +117,10 @@ export class GameState {
 
   public set turnStep(step: TurnStep) {
     this._turnStep = step;
+  }
+
+  public get turnStep() {
+    return this._turnStep;
   }
 
   public set selectedCharacter(character: Character | undefined) {

@@ -115,11 +115,9 @@ window.addEventListener('load', async () => {
   updater.sprites = sprites;
   renderer.worldmap = worldmap;
 
-  const game = new Game(updater, renderer, selector, gameEventQueue);
-
-  const gameState = new GameState(teams, 0);
-
   const titleScreen = new TitleScreen();
+  const game = new Game(updater, renderer, selector, gameEventQueue);
+  const gameState = new GameState(teams, 0);
 
   const titleScreenInterval = setInterval(() => {
     if (titleScreen.started == true) {
